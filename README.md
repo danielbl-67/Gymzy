@@ -11,7 +11,7 @@
 
 - **Gestión de Ejercicios:** Visualiza y organiza ejercicios basados en diferentes grupos musculares.
 - **Interfaz Intuitiva:** Diseño limpio enfocado en la experiencia del usuario durante el entrenamiento.
-- **Base de Datos Local:** (Opcional: menciona si usas SQLite o Room) Almacenamiento de rutinas y progresos.
+- **Base de Datos en Nube:**Firebase Almacenamiento de rutinas y progresos.
 - **Guía Visual:** Incluye recursos visuales para la correcta ejecución de los ejercicios.
 
 ## 🛠️ Tecnologías Utilizadas
