@@ -5,13 +5,30 @@
     android:layout_height="match_parent"
     android:background="#080808">
 
+    <ImageButton
+        android:id="@+id/btnVolverLista"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Volver"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_atras"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#FF5252" />
+
     <LinearLayout
         android:id="@+id/headerEjercicios"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp"
+        app:layout_constraintTop_toBottomOf="@id/btnVolverLista">
 
         <TextView
             android:layout_width="wrap_content"

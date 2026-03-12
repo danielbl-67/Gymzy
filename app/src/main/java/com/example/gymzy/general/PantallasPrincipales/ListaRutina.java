@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import com.example.gymzy.R;
-import com.example.gymzy.general.Api.Wger.EjerciciosListaActivity;
 import com.example.gymzy.general.sesion.SessionManager;
 
 public class ListaRutina extends DrawerBaseActivity {

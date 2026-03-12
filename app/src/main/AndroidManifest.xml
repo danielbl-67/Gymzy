@@ -24,29 +24,21 @@
         android:theme="@style/Theme.GYMZY">
 
         <!--Principal -->
-        <activity
-            android:name=".general.sesion.AuthActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
+        <activity android:name=".general.sesion.AuthActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
+        <!--Ejercicios -->
         <activity android:name=".general.PantallasPrincipales.ListaRutina"/>
-        <activity android:name=".general.PantallasPrincipales.HomeActivity"/>
+        <activity android:name=".general.PantallasPrincipales.DetalleEjercicioActivity" />
         <!--Sesion -->
+        <activity android:name=".general.PantallasPrincipales.HomeActivity"/>
         <activity android:name=".general.sesion.MainActivity"></activity>
         <activity android:name=".general.sesion.RegistroActivity"></activity>
         <activity android:name=".general.sesion.SignUpActivity"></activity>
-        <activity android:name=".general.sesion.RegistroActivity"></activity>
         <!--Configuracion Usuario -->
         <activity android:name=".general.PantallasPrincipales.ConfiguracionActivity"></activity>
         <!--Api Consulta -->
         <activity android:name=".general.PantallasPrincipales.Consulta"></activity>
-        <!--Api Wger -->
-        <activity android:name=".general.Api.Wger.EjerciciosListaActivity" android:exported="false" />
-        <activity android:name=".general.Api.Wger.DetalleEjercicioActivity" android:exported="false" />
+        <!--Api MuscleWiki -->
+        <activity android:name=".general.PantallasPrincipales.EjerciciosListaActivity" android:exported="false" />
 
 
 
