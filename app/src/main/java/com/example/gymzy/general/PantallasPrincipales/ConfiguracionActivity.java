@@ -1,7 +1,6 @@
 package com.example.gymzy.general.PantallasPrincipales;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,21 +20,19 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.gymzy.R;
+import com.example.gymzy.general.Usuarios.Usuario;
 import com.example.gymzy.general.firebase.FirebaseHelper;
-import com.example.gymzy.general.sesion.SessionManager;
+import com.google.firebase.auth.FirebaseUser;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class ConfiguracionActivity extends DrawerBaseActivity {
 
     private EditText etNombre, etEdad, etPeso, etAltura;
     private TextView tvValorIMC, tvEstadoIMC;
-    private Spinner spinnerSexo;
+    private Spinner spinnerSexo, spinnerObjetivo, spinnerActividad;
     private ImageView ivPerfil;
     private Button btnGuardar;
-    private SessionManager sessionManager;
 
     private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -44,8 +41,6 @@ public class ConfiguracionActivity extends DrawerBaseActivity {
                     Uri imageUri = result.getData().getData();
                     if (imageUri != null) {
                         ivPerfil.setImageURI(imageUri);
-                        getSharedPreferences("UserPrefs", MODE_PRIVATE).edit()
-                                .putString("profile_image", imageUri.toString()).apply();
                     }
                 }
             }
@@ -58,18 +53,15 @@ public class ConfiguracionActivity extends DrawerBaseActivity {
         setContentView(view);
         allocateActivityTitle("Configuración de Perfil");
 
-        sessionManager = new SessionManager(this);
-
         initUI();
-        setupSpinner();
-        cargarDatos();
+        setupSpinners();
+        cargarDatosDesdeFirestore();
 
         ivPerfil.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             galleryLauncher.launch(intent);
         });
 
-        // Listener para cálculo de IMC en tiempo real
         TextWatcher imcWatcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { calcularIMC(); }
@@ -78,7 +70,7 @@ public class ConfiguracionActivity extends DrawerBaseActivity {
         etPeso.addTextChangedListener(imcWatcher);
         etAltura.addTextChangedListener(imcWatcher);
 
-        btnGuardar.setOnClickListener(v -> guardarPerfilCompleto());
+        btnGuardar.setOnClickListener(v -> guardarPerfilEnFirebase());
     }
 
     private void initUI() {
@@ -88,111 +80,109 @@ public class ConfiguracionActivity extends DrawerBaseActivity {
         etPeso = findViewById(R.id.etPesoPerfil);
         etAltura = findViewById(R.id.etAlturaPerfil);
         spinnerSexo = findViewById(R.id.spinnerSexo);
+        spinnerObjetivo = findViewById(R.id.spinnerObjetivo);
+        spinnerActividad = findViewById(R.id.spinnerActividad);
         tvValorIMC = findViewById(R.id.tvValorIMC);
         tvEstadoIMC = findViewById(R.id.tvEstadoIMC);
         btnGuardar = findViewById(R.id.btnGuardarPerfil);
     }
 
-    private void setupSpinner() {
-        String[] opciones = {"Hombre", "Mujer", "Otro", "Sin especificar"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, opciones);
-        spinnerSexo.setAdapter(adapter);
+    private void setupSpinners() {
+        String[] opcionesSexo = {"Hombre", "Mujer", "Otro"};
+        String[] opcionesObjetivo = {"Perder peso", "Mantener peso", "Ganar masa muscular"};
+        String[] opcionesActividad = {"Sedentario", "Ligero", "Moderado", "Intenso"};
+
+        // Usamos R.layout.spinner_item en lugar del predeterminado de Android
+        ArrayAdapter<String> adapterSexo = new ArrayAdapter<>(this, R.layout.spinner_item, opcionesSexo);
+        ArrayAdapter<String> adapterObj = new ArrayAdapter<>(this, R.layout.spinner_item, opcionesObjetivo);
+        ArrayAdapter<String> adapterAct = new ArrayAdapter<>(this, R.layout.spinner_item, opcionesActividad);
+
+        // Esto es para cuando el menú se despliega
+        adapterSexo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapterObj.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapterAct.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerSexo.setAdapter(adapterSexo);
+        spinnerObjetivo.setAdapter(adapterObj);
+        spinnerActividad.setAdapter(adapterAct);
+    }
+
+    private void cargarDatosDesdeFirestore() {
+        FirebaseUser user = FirebaseHelper.getAuth().getCurrentUser();
+        if (user != null) {
+            FirebaseHelper.getFirestore().collection("Usuarios").document(user.getUid())
+                    .get().addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            Usuario u = doc.toObject(Usuario.class);
+                            if (u != null) {
+                                etNombre.setText(u.nombre);
+                                etEdad.setText(String.valueOf(u.edad));
+                                etPeso.setText(String.valueOf(u.peso));
+                                etAltura.setText(String.valueOf(u.altura));
+
+                                // Seleccionar automáticamente las opciones guardadas
+                                actualizarSeleccionSpinner(spinnerSexo, u.genero);
+                                actualizarSeleccionSpinner(spinnerObjetivo, u.objetivo);
+                                actualizarSeleccionSpinner(spinnerActividad, u.actividad);
+
+                                calcularIMC();
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void actualizarSeleccionSpinner(Spinner spinner, String valorGuardado) {
+        if (valorGuardado == null) return;
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        if (adapter != null) {
+            int position = adapter.getPosition(valorGuardado);
+            if (position >= 0) spinner.setSelection(position);
+        }
     }
 
     private void calcularIMC() {
-        String sPeso = etPeso.getText().toString();
-        String sAltura = etAltura.getText().toString();
-
-        if (!sPeso.isEmpty() && !sAltura.isEmpty()) {
-            try {
-                float peso = Float.parseFloat(sPeso);
-                float altura = Float.parseFloat(sAltura) / 100;
-                if (altura > 0) {
-                    float imc = peso / (altura * altura);
-                    tvValorIMC.setText(String.format(Locale.US, "%.1f", imc));
-                    if (imc < 18.5) {
-                        tvEstadoIMC.setText("Bajo peso");
-                        tvEstadoIMC.setTextColor(Color.CYAN);
-                    } else if (imc < 25) {
-                        tvEstadoIMC.setText("Peso saludable");
-                        tvEstadoIMC.setTextColor(Color.GREEN);
-                    } else {
-                        tvEstadoIMC.setText("Sobrepeso");
-                        tvEstadoIMC.setTextColor(Color.RED);
-                    }
-                }
-            } catch (Exception e) { tvValorIMC.setText("--"); }
-        }
+        try {
+            float peso = Float.parseFloat(etPeso.getText().toString());
+            float altura = Float.parseFloat(etAltura.getText().toString()) / 100;
+            if (altura > 0) {
+                float imc = peso / (altura * altura);
+                tvValorIMC.setText(String.format(Locale.US, "%.1f", imc));
+                if (imc < 18.5) { tvEstadoIMC.setText("Bajo peso"); tvEstadoIMC.setTextColor(Color.CYAN); }
+                else if (imc < 25) { tvEstadoIMC.setText("Peso saludable"); tvEstadoIMC.setTextColor(Color.GREEN); }
+                else { tvEstadoIMC.setText("Sobrepeso"); tvEstadoIMC.setTextColor(Color.RED); }
+            }
+        } catch (Exception e) { tvValorIMC.setText("--"); }
     }
 
-    private void cargarDatos() {
-        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+    private void guardarPerfilEnFirebase() {
+        FirebaseUser user = FirebaseHelper.getAuth().getCurrentUser();
+        if (user == null) return;
 
-        // Prioridad al nombre de sesión
-        String nombreSesion = sessionManager.getUsername();
-        etNombre.setText(nombreSesion != null && !nombreSesion.isEmpty() ? nombreSesion : prefs.getString("nombre", ""));
+        try {
+            Usuario perfilEditado = new Usuario(
+                    etNombre.getText().toString().trim(),
+                    Integer.parseInt(etEdad.getText().toString().trim()),
+                    Double.parseDouble(etPeso.getText().toString().trim()),
+                    Double.parseDouble(etAltura.getText().toString().trim()),
+                    spinnerSexo.getSelectedItem().toString(),
+                    spinnerObjetivo.getSelectedItem().toString(),
+                    spinnerActividad.getSelectedItem().toString()
+            );
 
-        etEdad.setText(prefs.getString("edad", ""));
-        etPeso.setText(prefs.getString("peso", ""));
-        etAltura.setText(prefs.getString("altura", ""));
-
-        String sexo = prefs.getString("sexo", "Hombre");
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinnerSexo.getAdapter();
-        if (adapter != null) spinnerSexo.setSelection(adapter.getPosition(sexo));
-
-        String imgPath = prefs.getString("profile_image", null);
-        if (imgPath != null) {
-            try { ivPerfil.setImageURI(Uri.parse(imgPath)); }
-            catch (Exception e) { ivPerfil.setImageResource(android.R.drawable.ic_menu_camera); }
+            btnGuardar.setEnabled(false);
+            FirebaseHelper.getFirestore().collection("Usuarios").document(user.getUid())
+                    .set(perfilEditado)
+                    .addOnSuccessListener(aVoid -> {
+                        btnGuardar.setEnabled(true);
+                        Toast.makeText(this, "Perfil actualizado", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        btnGuardar.setEnabled(true);
+                        Toast.makeText(this, "Error al guardar", Toast.LENGTH_SHORT).show();
+                    });
+        } catch (Exception e) {
+            Toast.makeText(this, "Revisa los números ingresados", Toast.LENGTH_SHORT).show();
         }
-        calcularIMC();
-    }
-
-    private void guardarPerfilCompleto() {
-        String nombre = etNombre.getText().toString().trim();
-        String edad = etEdad.getText().toString().trim();
-        String peso = etPeso.getText().toString().trim();
-        String altura = etAltura.getText().toString().trim();
-        String sexo = spinnerSexo.getSelectedItem().toString();
-        String imc = tvValorIMC.getText().toString();
-
-        if (nombre.isEmpty()) {
-            Toast.makeText(this, "Por favor, ingresa un nombre", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String userId = sessionManager.getUsername();
-        if (userId == null || userId.isEmpty()) userId = "usuario_desconocido";
-
-        // 1. Crear mapa para Firebase
-        Map<String, Object> perfilData = new HashMap<>();
-        perfilData.put("nombre", nombre);
-        perfilData.put("edad", edad);
-        perfilData.put("peso", peso);
-        perfilData.put("altura", altura);
-        perfilData.put("sexo", sexo);
-        perfilData.put("imc", imc);
-        perfilData.put("ultima_actualizacion", System.currentTimeMillis());
-
-        // 2. Guardar en Firebase usando tu Helper
-        FirebaseHelper.getPerfilRef(userId).setValue(perfilData)
-                .addOnSuccessListener(aVoid -> {
-                    // 3. Si Firebase va bien, guardamos en Local
-                    guardarEnLocal(nombre, edad, peso, altura, sexo);
-                    Toast.makeText(ConfiguracionActivity.this, "¡Perfil sincronizado con éxito!", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(ConfiguracionActivity.this, "Error al guardar en la nube", Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void guardarEnLocal(String n, String e, String p, String a, String s) {
-        SharedPreferences.Editor editor = getSharedPreferences("UserPrefs", MODE_PRIVATE).edit();
-        editor.putString("nombre", n);
-        editor.putString("edad", e);
-        editor.putString("peso", p);
-        editor.putString("altura", a);
-        editor.putString("sexo", s);
-        editor.apply();
     }
 }

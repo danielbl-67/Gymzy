@@ -191,10 +191,6 @@ public class SessionManager {
             etPeso = findViewById(R.id.etPeso);
             etAltura = findViewById(R.id.etAltura);
 
-            spGenero = findViewById(R.id.spinnerGenero);
-            spObjetivo = findViewById(R.id.spinnerObjetivo);
-            spActividad = findViewById(R.id.spinnerActividad);
-
             btnRegistrar = findViewById(R.id.btnFinalizarRegistro);
 
             // Configurar los menús desplegables
