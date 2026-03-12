@@ -38,26 +38,10 @@
         <!--Sesion -->
         <activity android:name=".general.sesion.MainActivity"></activity>
         <activity android:name=".general.sesion.RegistroActivity"></activity>
-        <activity android:name=".general.sesion.SignUpActivity" />
+        <activity android:name=".general.sesion.SignUpActivity"></activity>
+        <activity android:name=".general.sesion.RegistroActivity"></activity>
         <!--Configuracion Usuario -->
         <activity android:name=".general.PantallasPrincipales.ConfiguracionActivity"></activity>
-
-        <!--MusculosGenerales -->
-        <activity android:name=".musculosGeneral.abs" android:exported="false" />
-        <activity android:name=".musculosGeneral.pecho" android:exported="false" />
-        <activity android:name=".musculosGeneral.espalda" android:exported="false" />
-        <activity android:name=".musculosGeneral.biceps" android:exported="false" />
-        <activity android:name=".musculosGeneral.triceps" android:exported="false" />
-        <activity android:name=".musculosGeneral.pierna" android:exported="false" />
-        <activity android:name=".musculosGeneral.hombro" android:exported="false" />
-        <activity android:name=".musculosGeneral.gluteo" android:exported="false" />
-        <activity android:name=".musculosGeneral.cardio" android:exported="false" />
-        <!--Musculo_Abdominales -->
-        <activity android:name=".general.PantallasPrincipales.Precios" android:exported="false" />
-        <activity android:name=".musculoPecho.PressBancaDetalleActivity" android:exported="false" />
-        <activity android:name=".musculoAbs.ab_crunch" android:exported="false" />
-        <activity android:name=".musculoAbs.ab_elevaciones" android:exported="false" />
-        <activity android:name=".musculoAbs.ab_mountainclimber" android:exported="false" />
         <!--Api Consulta -->
         <activity android:name=".general.PantallasPrincipales.Consulta"></activity>
         <!--Api Wger -->

@@ -21,8 +21,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.gymzy.R;
 import com.example.gymzy.general.Usuarios.Usuario;
-import com.example.gymzy.general.firebase.FirebaseHelper;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Locale;
 
@@ -183,6 +186,23 @@ public class ConfiguracionActivity extends DrawerBaseActivity {
                     });
         } catch (Exception e) {
             Toast.makeText(this, "Revisa los números ingresados", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static class FirebaseHelper {
+
+        public static DatabaseReference getDatabase() {
+            // REEMPLAZA ESTA URL con la que copiaste de tu consola de Firebase
+            String url = "https://bdpruebasprog-default-rtdb.firebaseio.com/";
+            return FirebaseDatabase.getInstance(url).getReference();
+        }
+
+        public static FirebaseFirestore getFirestore() {
+            return FirebaseFirestore.getInstance();
+        }
+
+        public static FirebaseAuth getAuth() {
+            return FirebaseAuth.getInstance();
         }
     }
 }

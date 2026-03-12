@@ -16,7 +16,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:fontFamily="@font/comfortaa"
             android:text="TU PERFIL"
             android:textColor="#FF5252"
             android:textSize="38sp"
@@ -43,7 +42,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:hint="Nombre Completo"
-                    app:boxStrokeColor="#FF5252">
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etNombreCompleto"
                         android:layout_width="match_parent"
@@ -69,7 +70,6 @@
                             android:inputType="number"
                             android:textColor="@android:color/white" />
                     </com.google.android.material.textfield.TextInputLayout>
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -108,6 +108,51 @@
                             android:textColor="@android:color/white" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Género"
+                    app:boxStrokeColor="#FF5252">
+                    <AutoCompleteTextView
+                        android:id="@+id/spGenero"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Objetivo"
+                    app:boxStrokeColor="#FF5252">
+                    <AutoCompleteTextView
+                        android:id="@+id/spObjetivo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Nivel de Actividad"
+                    app:boxStrokeColor="#FF5252">
+                    <AutoCompleteTextView
+                        android:id="@+id/spActividad"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFinalizarRegistro"

@@ -52,7 +52,7 @@ dependencies {
 
     // Importa el BoM de Firebase (gestiona las versiones por ti)
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-
+    implementation ("com.google.firebase:firebase-firestore")
     // Añade las librerías que necesitas
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")

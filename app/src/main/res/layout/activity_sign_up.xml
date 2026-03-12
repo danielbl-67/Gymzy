@@ -112,7 +112,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCrearCuenta"
+                    android:id="@+id/btnSiguientePaso"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
                     android:backgroundTint="#FF5252"

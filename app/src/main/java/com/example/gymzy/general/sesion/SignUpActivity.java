@@ -5,25 +5,36 @@ import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.gymzy.R;
-import com.example.gymzy.general.firebase.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignUpActivity extends AppCompatActivity {
     private TextInputEditText etUsername, etEmail, etPassword;
-    private MaterialButton btnCrearCuenta;
+    private MaterialButton btnSiguiente;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
         etUsername = findViewById(R.id.editTextUsername);
         etEmail = findViewById(R.id.editTextEmail);
         etPassword = findViewById(R.id.editTextPassword);
-        btnCrearCuenta = findViewById(R.id.btnCrearCuenta);
+        btnSiguiente = findViewById(R.id.btnSiguientePaso); // Asegúrate que este ID sea el de tu XML
 
-        btnCrearCuenta.setOnClickListener(v -> registrar());
+        btnSiguiente.setOnClickListener(v -> registrar());
     }
 
     private void registrar() {
@@ -32,31 +43,31 @@ public class SignUpActivity extends AppCompatActivity {
         String pass = etPassword.getText().toString().trim();
 
         if (user.isEmpty() || email.isEmpty() || pass.length() < 6) {
-            Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Completa los campos correctamente", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // PASO 1: Verificar que nadie más tenga ese nombre de usuario
-        FirebaseHelper.getDatabase().child("UsuariosLogueo").child(user).get().addOnCompleteListener(task -> {
+        // PASO 1: Crear en Firebase Auth
+        mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                if (task.getResult().exists()) {
-                    Toast.makeText(this, "Ese nombre de usuario ya existe", Toast.LENGTH_SHORT).show();
-                } else {
-                    // PASO 2: Crear la cuenta en Firebase Auth
-                    FirebaseHelper.getAuth().createUserWithEmailAndPassword(email, pass).addOnCompleteListener(authTask -> {
-                        if (authTask.isSuccessful()) {
-                            // PASO 3: Guardar el vínculo Username -> Email
-                            FirebaseHelper.getDatabase().child("UsuariosLogueo").child(user).setValue(email)
-                                    .addOnSuccessListener(aVoid -> {
-                                        Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(this, RegistroActivity.class));
-                                        finish();
-                                    });
-                        } else {
-                            Toast.makeText(this, "Error: " + authTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+
+                // PASO 2: Guardar el nombre de usuario en REALTIME DATABASE
+                // Usamos la misma ruta que usará el Login
+                FirebaseDatabase.getInstance().getReference().child("UsuariosLogueo")
+                        .child(user)
+                        .setValue(email)
+                        .addOnSuccessListener(aVoid -> {
+                            // PASO 3: Salto al siguiente paso (Registro de peso/altura)
+                            Intent intent = new Intent(SignUpActivity.this, RegistroActivity.class);
+                            startActivity(intent);
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this, "Error al guardar username: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+
+            } else {
+                Toast.makeText(this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

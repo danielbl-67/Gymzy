@@ -4,36 +4,37 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.gymzy.R;
-import com.example.gymzy.general.PantallasPrincipales.DrawerBaseActivity;
 import com.example.gymzy.general.PantallasPrincipales.HomeActivity;
-import com.example.gymzy.general.firebase.FirebaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-public class MainActivity extends DrawerBaseActivity {
+public class MainActivity extends AppCompatActivity {
     private TextInputEditText etUser, etPass;
-    private TextInputLayout layUser, layPass; // Añadido layPass
+    private TextInputLayout layUser, layPass;
     private MaterialButton btnLogin;
-    private SessionManager sessionManager; // Asegúrate de tener esta variable
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflamos la vista correctamente para DrawerBaseActivity
-        View view = getLayoutInflater().inflate(R.layout.activity_main, null);
-        setContentView(view);
+        // Usamos directamente el layout de la actividad
+        setContentView(R.layout.activity_main);
 
-        // Inicializamos el SessionManager
         sessionManager = new SessionManager(this);
 
-        // Vincular vistas
         etUser = findViewById(R.id.editTextUsuario);
         etPass = findViewById(R.id.editTextContrasena);
         layUser = findViewById(R.id.textInputLayoutUsuario);
-        layPass = findViewById(R.id.textInputLayoutContrasena); // Vinculado correctamente
+        layPass = findViewById(R.id.textInputLayoutContrasena);
         btnLogin = findViewById(R.id.btnIniciarSesion);
 
         btnLogin.setOnClickListener(v -> iniciarSesion());
@@ -43,47 +44,52 @@ public class MainActivity extends DrawerBaseActivity {
         String user = etUser.getText().toString().trim().toLowerCase();
         String pass = etPass.getText().toString().trim();
 
-        // Limpiar errores previos
-        layUser.setError(null);
-        layPass.setError(null);
+        if (user.isEmpty() || pass.isEmpty()) return;
 
-        if (user.isEmpty() || pass.isEmpty()) {
-            Toast.makeText(this, "Ingresa usuario y contraseña", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // BUSCAMOS EN LA MISMA RUTA: UsuariosLogueo -> nombre_usuario
+        FirebaseDatabase.getInstance().getReference().child("UsuariosLogueo").child(user).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult().exists()) {
 
-        // PASO 1: Buscar en la base de datos qué Email le pertenece a ese Username
-        FirebaseHelper.getDatabase().child("UsuariosLogueo").child(user).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult().exists()) {
+                        // Si existe, sacamos el email que guardamos en el SignUp
+                        String emailRecuperado = task.getResult().getValue(String.class);
 
-                // PASO 2: Recuperar el email que guardamos en el registro
-                String emailAsociado = task.getResult().getValue(String.class);
+                        // Iniciamos sesión con ese email
+                        FirebaseAuth.getInstance().signInWithEmailAndPassword(emailRecuperado, pass)
+                                .addOnCompleteListener(authTask -> {
+                                    if (authTask.isSuccessful()) {
+                                        sessionManager.createLoginSession(user);
+                                        startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                                        finish();
+                                    } else {
+                                        Toast.makeText(this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        // Si llegas aquí, es que el nombre de usuario no existe en la DB
+                        Toast.makeText(this, "El usuario '" + user + "' no existe", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
 
-                if (emailAsociado != null) {
-                    // PASO 3: Iniciar sesión en Firebase con ese email y la contraseña
-                    FirebaseHelper.getAuth().signInWithEmailAndPassword(emailAsociado, pass)
-                            .addOnCompleteListener(authTask -> {
-                                if (authTask.isSuccessful()) {
-                                    // Guardamos la sesión local
-                                    sessionManager.createLoginSession(user);
+    private void loginConFirebase(String email, String password, String username) {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(authTask -> {
+                    if (authTask.isSuccessful()) {
+                        // LOGIN EXITOSO
+                        sessionManager.createLoginSession(username);
 
-                                    // Usamos MainActivity.this para el contexto
-                                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                } else {
-                                    // Error de contraseña (o credenciales inválidas)
-                                    layPass.setError("Contraseña incorrecta");
-                                    Toast.makeText(MainActivity.this, "Error al autenticar", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                }
-
-            } else {
-                // BLOQUEO: Si el username no existe en la base de datos
-                layUser.setError("Este usuario no existe");
-                Toast.makeText(MainActivity.this, "No estás registrado en Gymzy", Toast.LENGTH_LONG).show();
-            }
-        });
+                        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                        // Limpiamos la pila de actividades para que no pueda volver atrás al login
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // FALLO EN LA CONTRASEÑA O CUENTA BLOQUEADA
+                        layPass.setError("Contraseña incorrecta o error de autenticación");
+                        String errorMsg = authTask.getException() != null ? authTask.getException().getMessage() : "Error desconocido";
+                        Toast.makeText(MainActivity.this, "Fallo: " + errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }
