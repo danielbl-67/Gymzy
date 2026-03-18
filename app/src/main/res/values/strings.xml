@@ -105,4 +105,23 @@
     <string name="menu_open">Abrir menú</string>
     <string name="menu_close">Cerrar menú</string>
 
+
+        <string-array name="opciones_genero">
+            <item>Hombre</item>
+            <item>Mujer</item>
+            <item>Otro</item>
+        </string-array>
+        <string-array name="opciones_actividad">
+            <item>Sedentario (Poco ejercicio)</item>
+            <item>Ligero (1-3 días/semana)</item>
+            <item>Moderado (3-5 días/semana)</item>
+            <item>Intenso (6-7 días/semana)</item>
+        </string-array>
+        <string-array name="opciones_objetivo">
+            <item>Perder peso</item>
+            <item>Mantener peso</item>
+            <item>Ganar masa muscular</item>
+        </string-array>
+
+
 </resources>

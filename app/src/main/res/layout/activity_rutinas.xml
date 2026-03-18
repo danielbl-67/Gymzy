@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#080808"
-    tools:context=".general.ListaRutina">
+    tools:context=".general.PantallasPrincipales.ListaRutina">
 
     <LinearLayout
         android:id="@+id/linearLayoutHeader"
@@ -246,13 +246,13 @@
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCerrarSesion"
+        android:id="@+id/btnSalir"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:fontFamily="@font/comfortaa"
-        android:text="@string/btncerrarsesion"
+        android:text="@string/btnSalir"
         android:textColor="#FF5252"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"

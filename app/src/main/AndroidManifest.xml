@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,64 +21,27 @@
         android:label="@string/app_name"
         android:roundIcon="@color/design_default_color_primary_dark"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GYMZY"
-        >
-        <activity
-            android:name=".general.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        android:theme="@style/Theme.GYMZY">
 
-        <activity
-            android:name=".general.ListaRutina"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".general.HomeActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <!--Principal -->
+        <activity android:name=".general.sesion.AuthActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
+        <!--Ejercicios -->
+        <activity android:name=".general.PantallasPrincipales.ListaRutina"/>
+        <activity android:name=".general.PantallasPrincipales.DetalleEjercicioActivity" />
+        <!--Sesion -->
+        <activity android:name=".general.PantallasPrincipales.HomeActivity"/>
+        <activity android:name=".general.sesion.MainActivity"></activity>
+        <activity android:name=".general.sesion.RegistroActivity"></activity>
+        <activity android:name=".general.sesion.SignUpActivity"></activity>
+        <!--Configuracion Usuario -->
+        <activity android:name=".general.PantallasPrincipales.ConfiguracionActivity"></activity>
+        <!--Api Consulta -->
+        <activity android:name=".general.PantallasPrincipales.Consulta"></activity>
+        <!--Api MuscleWiki -->
+        <activity android:name=".general.PantallasPrincipales.EjerciciosListaActivity" android:exported="false" />
 
-        <activity
-            android:name=".musculosGeneral.abs">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.pecho">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.espalda">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.biceps">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.triceps">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.pierna">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.hombro">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.gluteo">
-        </activity>
-        <activity
-            android:name=".musculosGeneral.cardio">
-        </activity>
-        <activity android:name=".general.Precios"/>
-        <activity android:name=".musculoPecho.PressBancaDetalleActivity"/>
-        <activity android:name=".musculoAbs.ab_crunch" />
-        <activity android:name=".musculoAbs.ab_elevaciones" />
-        <activity android:name=".musculoAbs.ab_mountainclimber" />
 
-        
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

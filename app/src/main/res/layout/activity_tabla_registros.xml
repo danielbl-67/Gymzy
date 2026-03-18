@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#080808"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HISTORIAL DE SESIÓN"
+        android:textColor="#FF5252"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"/>
+
+    <TableLayout
+        android:id="@+id/tableRegistros"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*">
+
+        <TableRow android:background="#1A1A1A" android:padding="8dp">
+            <TextView android:text="Series" android:textColor="#FFFFFF" android:textStyle="bold" />
+            <TextView android:text="Reps" android:textColor="#FFFFFF" android:textStyle="bold" />
+            <TextView android:text="Peso (kg)" android:textColor="#FFFFFF" android:textStyle="bold" />
+        </TableRow>
+
+    </TableLayout>
+</LinearLayout>

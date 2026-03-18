@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#080808"
-    tools:context=".general.Precios">
+    tools:context=".general.PantallasPrincipales.Precios">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonSalir"

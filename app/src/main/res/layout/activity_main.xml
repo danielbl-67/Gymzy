@@ -1,25 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#050505"
-    tools:context=".general.MainActivity">
+    android:background="#050505">
 
     <View
         android:layout_width="500dp"
         android:layout_height="500dp"
         android:layout_marginTop="-200dp"
         android:layout_marginEnd="-180dp"
-        android:background="@android:drawable/screen_background_dark_transparent"
         android:backgroundTint="#2FFF5252"
         android:alpha="0.4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/headerContainer"
+        android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -30,40 +27,25 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-        android:id="@+id/titulo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/comfortaa"
-        android:text="@string/app_name"
-        android:textStyle="bold|italic"
-        android:textColor="#FF5252"
-        android:textSize="58sp"
-        android:letterSpacing="-0.04" />
-
-        <TextView
-            android:id="@+id/tvGreeting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/comfortaa"
-            android:text="@string/frase"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:alpha="0.8"
-            android:letterSpacing="0.12" />
+            android:text="GYMZY"
+            android:textStyle="bold|italic"
+            android:textColor="#FF5252"
+            android:textSize="58sp" />
     </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/loginCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="28dp"
         android:layout_marginTop="40dp"
         app:cardBackgroundColor="#0FFFFFFF"
         app:cardCornerRadius="35dp"
-        app:cardElevation="0dp"
         app:strokeColor="#4DFF5252"
         app:strokeWidth="1.5dp"
-        app:layout_constraintTop_toBottomOf="@+id/headerContainer">
+        app:layout_constraintTop_toBottomOf="@id/header">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -77,22 +59,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Usuario"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
+                android:hint="Nombre de Usuario"
                 app:boxStrokeColor="#FF5252"
-                app:hintTextColor="#80FFFFFF"
                 app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-                app:startIconTint="#80FFFFFF"
-                app:errorEnabled="true">
-
+                app:startIconTint="#80FFFFFF">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextUsuario"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/comfortaa"
                     android:textColor="#FFFFFF"
                     android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -104,25 +78,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
                 android:hint="Contraseña"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxStrokeColor="#FF5252"
-                app:hintTextColor="#80FFFFFF"
                 app:passwordToggleEnabled="true"
-                app:passwordToggleTint="#80FFFFFF"
+                app:boxStrokeColor="#FF5252"
                 app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
-                app:startIconTint="#80FFFFFF"
-                app:errorEnabled="true">
-
+                app:startIconTint="#80FFFFFF">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextContrasena"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/comfortaa"
-                    android:inputType="textPassword"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="#FFFFFF"
+                    android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -130,29 +95,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:backgroundTint="#FF5252"
-                android:fontFamily="@font/comfortaa"
                 android:text="INICIAR SESIÓN"
-                android:textSize="17sp"
                 android:textStyle="bold"
-                app:cornerRadius="18dp"
-                app:elevation="12dp" />
+                app:cornerRadius="18dp" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnVerPrecios"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:fontFamily="@font/comfortaa"
-        android:text="VER PLANES"
-        android:textColor="#FF5252"
-        android:textSize="15sp"
-        android:letterSpacing="0.1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,6 +23,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvCurrentDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hoy es un buen día para entrenar"
@@ -36,13 +37,11 @@
             app:cardBackgroundColor="@color/fondo"
             app:cardCornerRadius="15dp"
             app:cardElevation="8dp">
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="20dp">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -51,7 +50,6 @@
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.1" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -59,7 +57,6 @@
                     android:textColor="@android:color/white"
                     android:textSize="24sp"
                     android:textStyle="bold" />
-
                 <Button
                     android:id="@+id/btnEmpezarRutina"
                     android:layout_width="match_parent"
@@ -70,12 +67,11 @@
                     android:textColor="@color/negro_app"
                     android:textStyle="bold"
                     app:cornerRadius="10dp" />
-
                 <Button
                     android:id="@+id/btnMusculos"
                     android:layout_width="match_parent"
                     android:layout_height="65dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="12dp"
                     android:backgroundTint="#252525"
                     android:gravity="center_vertical|start"
                     android:paddingStart="25dp"
@@ -91,41 +87,74 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:columnCount="2"
+            android:columnCount="3"
             android:rowCount="1">
-
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="120dp"
                 android:layout_columnWeight="1"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="#1E1E1E"
+                app:cardCornerRadius="15dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="10dp">
+                    <TextView
+                        android:id="@+id/tvStepCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0\npasos"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                    <ProgressBar
+                        android:id="@+id/pbSteps"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="10dp"
+                        android:max="10000"
+                        android:progress="0"
+                        android:progressTint="#FFD700" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="120dp"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="8dp"
                 app:cardBackgroundColor="#1E1E1E"
                 app:cardCornerRadius="15dp">
                 <TextView
+                    android:id="@+id/tvCalories"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="750\nKcal"
+                    android:text="0\nkcal"
                     android:textAlignment="center"
                     android:textColor="@android:color/white"
-                    android:textSize="18sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </androidx.cardview.widget.CardView>
-
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="120dp"
                 android:layout_columnWeight="1"
                 app:cardBackgroundColor="#1E1E1E"
                 app:cardCornerRadius="15dp">
                 <TextView
+                    android:id="@+id/tvWalkingTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="45\nMinutos"
+                    android:text="0\nmin"
                     android:textAlignment="center"
                     android:textColor="@android:color/white"
-                    android:textSize="18sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </androidx.cardview.widget.CardView>
         </GridLayout>
@@ -133,7 +162,36 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tu Semana"
+            android:text="Análisis Semanal"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="25dp" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="15dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="bottom|center_horizontal"
+                android:padding="15dp">
+                <View android:id="@+id/barMon" android:layout_width="20dp" android:layout_height="0dp" android:layout_margin="5dp" android:background="#333333" />
+                <View android:id="@+id/barTue" android:layout_width="20dp" android:layout_height="0dp" android:layout_margin="5dp" android:background="#333333" />
+                <View android:id="@+id/barWed" android:layout_width="20dp" android:layout_height="0dp" android:layout_margin="5dp" android:background="#333333" />
+                <View android:id="@+id/barThu" android:layout_width="20dp" android:layout_height="0dp" android:layout_margin="5dp" android:background="#333333" />
+                <View android:id="@+id/barFri" android:layout_width="20dp" android:layout_height="0dp" android:layout_margin="5dp" android:background="#333333" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tu Semana (Historial)"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -145,18 +203,17 @@
             android:layout_marginTop="10dp"
             app:cardBackgroundColor="#1A1A1A"
             app:cardCornerRadius="15dp">
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="15dp"
                 android:gravity="center">
-                <TextView android:layout_width="38dp" android:layout_height="38dp" android:background="@color/fondo" android:text="L" android:gravity="center" android:textColor="@android:color/white" android:textStyle="bold" android:layout_margin="4dp"/>
-                <TextView android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="M" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
-                <TextView android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="X" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
-                <TextView android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="J" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
-                <TextView android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="V" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
+                <TextView android:id="@+id/tvLunes" android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="L" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
+                <TextView android:id="@+id/tvMartes" android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="M" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
+                <TextView android:id="@+id/tvMiercoles" android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="X" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
+                <TextView android:id="@+id/tvJueves" android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="J" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
+                <TextView android:id="@+id/tvViernes" android:layout_width="38dp" android:layout_height="38dp" android:background="#333333" android:text="V" android:gravity="center" android:textColor="#666666" android:layout_margin="4dp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -168,7 +225,7 @@
             app:cardCornerRadius="15dp">
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="15dp">
                 <TextView android:id="@+id/tvWaterTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Meta de Agua" android:textColor="@android:color/white" android:textStyle="bold" />
-                <TextView android:id="@+id/tvWaterCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@id/tvWaterTitle" android:text="1.5L / 2.5L" android:textColor="@android:color/white" android:textSize="20sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvWaterCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@id/tvWaterTitle" android:text="0.00L / 2.5L" android:textColor="@android:color/white" android:textSize="20sp" android:textStyle="bold" />
                 <Button android:id="@+id/btnAddWater" android:layout_width="45dp" android:layout_height="45dp" android:layout_alignParentEnd="true" android:backgroundTint="@android:color/white" android:text="+" android:textColor="#0D47A1" android:textStyle="bold" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -187,7 +244,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginTop="10dp">
-
             <Button
                 android:id="@+id/btnPlanes"
                 android:layout_width="match_parent"
@@ -201,7 +257,6 @@
                 android:paddingStart="25dp"
                 app:icon="@android:drawable/btn_star_big_on"
                 app:iconPadding="15dp" />
-
             <Button
                 android:id="@+id/btnCerrarSesion"
                 android:layout_width="match_parent"
@@ -217,9 +272,6 @@
                 app:iconPadding="15dp" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="60dp" />
-
+        <View android:layout_width="match_parent" android:layout_height="60dp" />
     </LinearLayout>
 </ScrollView>

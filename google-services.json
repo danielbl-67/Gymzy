@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "504682682392",
+    "project_id": "bdpruebasprog",
+    "storage_bucket": "bdpruebasprog.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:504682682392:android:3ed70a2c21049abb250b6d",
+        "android_client_info": {
+          "package_name": "com.example.gymzy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKEtUB_qe2rNrotwwrkU6q7r5N_tJ-FUw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
