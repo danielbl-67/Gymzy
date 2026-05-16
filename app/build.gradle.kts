@@ -31,6 +31,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
@@ -58,10 +63,11 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
 
+    implementation("com.google.mlkit:translate:17.0.1")
 
     //noinspection UseTomlInstead,NewerVersionAvailable
     implementation("androidx.health.connect:connect-client:1.1.0-alpha11")
-// Necesario para trabajar con Futures en Java
+    // Necesario para trabajar con Futures en Java
     implementation("com.google.guava:guava:31.1-android")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

@@ -52,30 +52,26 @@
                         android:textColor="@android:color/white" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <LinearLayout
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
+                    android:layout_marginBottom="12dp"
+                    android:hint="Edad"
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEdad"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Edad"
-                        app:boxStrokeColor="#FF5252">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etEdad"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:textColor="@android:color/white" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
+                        android:inputType="number"
+                        android:textColor="@android:color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
                     android:orientation="horizontal">
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -83,7 +79,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:hint="Peso (kg)"
-                        app:boxStrokeColor="#FF5252">
+                        app:boxStrokeColor="#FF5252"
+                        app:hintTextColor="#FF5252"
+                        android:textColorHint="#80FFFFFF">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPeso"
                             android:layout_width="match_parent"
@@ -99,7 +97,9 @@
                         android:layout_weight="1"
                         android:layout_marginStart="10dp"
                         android:hint="Altura (cm)"
-                        app:boxStrokeColor="#FF5252">
+                        app:boxStrokeColor="#FF5252"
+                        app:hintTextColor="#FF5252"
+                        android:textColorHint="#80FFFFFF">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAltura"
                             android:layout_width="match_parent"
@@ -114,8 +114,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:hint="Selecciona tu Rol"
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
+                    <AutoCompleteTextView
+                        android:id="@+id/spRol"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:textColor="@android:color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:hint="Género"
-                    app:boxStrokeColor="#FF5252">
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
                     <AutoCompleteTextView
                         android:id="@+id/spGenero"
                         android:layout_width="match_parent"
@@ -130,7 +149,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Objetivo"
-                    app:boxStrokeColor="#FF5252">
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
                     <AutoCompleteTextView
                         android:id="@+id/spObjetivo"
                         android:layout_width="match_parent"
@@ -145,7 +166,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Nivel de Actividad"
-                    app:boxStrokeColor="#FF5252">
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
                     <AutoCompleteTextView
                         android:id="@+id/spActividad"
                         android:layout_width="match_parent"
@@ -163,6 +186,23 @@
                     android:text="GUARDAR Y EMPEZAR"
                     android:textStyle="bold"
                     app:cornerRadius="18dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Código del Profesional (Opcional)"
+                    app:boxStrokeColor="#FF5252"
+                    app:hintTextColor="#FF5252"
+                    android:textColorHint="#80FFFFFF">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCodigoProfesional"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapCharacters"
+                        android:textColor="@android:color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

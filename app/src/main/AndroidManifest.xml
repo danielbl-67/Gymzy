@@ -3,14 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-    </queries>
-    <uses-permission android:name="android.permission.health.READ_STEPS" />
-    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 
     <application
         android:usesCleartextTraffic="true"
@@ -23,28 +25,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GYMZY">
 
-        <!--Principal -->
-        <activity android:name=".general.sesion.AuthActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
-        <!--Ejercicios -->
-        <activity android:name=".general.PantallasPrincipales.ListaRutina"/>
-        <activity android:name=".general.PantallasPrincipales.DetalleEjercicioActivity" />
-        <!--Sesion -->
-        <activity android:name=".general.PantallasPrincipales.HomeActivity"/>
-        <activity android:name=".general.sesion.MainActivity"></activity>
-        <activity android:name=".general.sesion.RegistroActivity"></activity>
-        <activity android:name=".general.sesion.SignUpActivity"></activity>
-        <!--Configuracion Usuario -->
-        <activity android:name=".general.PantallasPrincipales.ConfiguracionActivity"></activity>
-        <!--Api Consulta -->
-        <activity android:name=".general.PantallasPrincipales.Consulta"></activity>
-        <!--Api MuscleWiki -->
-        <activity android:name=".general.PantallasPrincipales.EjerciciosListaActivity" android:exported="false" />
+        <activity
+            android:name=".general.sesion.autenticacion"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
+        <activity android:name=".general.sesion.mainactivity" android:exported="false" />
+        <activity android:name=".general.sesion.iniciosesion" android:exported="false" />
+        <activity android:name=".general.sesion.registroactivity" android:exported="false" />
 
+        <activity android:name=".general.pantallasprincipales.homeactivity" android:exported="false" />
 
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
+        <activity android:name=".general.roles.panelprofesionalactivity" android:exported="false" />
+
+        <activity android:name=".general.roles.paneladminactivity" android:exported="false" />
+
+        <activity android:name=".general.pantallasprincipales.listarutina" android:exported="false" />
+        <activity android:name=".general.pantallasprincipales.detalleejercicioactivity" android:exported="false" />
+        <activity android:name=".general.pantallasprincipales.ejercicioslistaactivity" android:exported="false" />
+
+        <activity android:name=".general.pantallasprincipales.configuracionactivity" android:exported="false" />
+        <activity android:name=".general.pantallasprincipales.precios" android:exported="false" />
+        <activity android:name=".general.pantallasprincipales.consulta" android:exported="false" />
+        <activity android:name=".general.pantallasprincipales.historialejercicioactivity" android:exported="false" android:screenOrientation="portrait" />
+        <meta-data android:name="preloaded_fonts" android:resource="@array/preloaded_fonts" />
+
     </application>
 
 </manifest>
