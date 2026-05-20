@@ -21,6 +21,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragmento encargado de mostrar la lista de clientes vinculados a un profesional especifico.
+ * Filtra los usuarios en Firestore segun el codigo de vinculacion del entrenador o nutricionista.
+ */
 public class listaclientesfragment extends Fragment {
 
     private TextView tvTituloLista;
@@ -30,6 +34,14 @@ public class listaclientesfragment extends Fragment {
     private List<usuario> listaclientes;
     private clientesadapter adapter;
 
+    /**
+     * Infla la vista del fragmento, inicializa componentes y configura el RecyclerView.
+     *
+     * @param inflater           Objeto utilizado para inflar la vista.
+     * @param container          Contenedor padre donde se insertara la vista.
+     * @param savedInstanceState Estado previo guardado de la instancia.
+     * @return La vista raiz del fragmento.
+     */
     @SuppressLint("MissingInflatedId")
     @Nullable
     @Override
@@ -52,6 +64,10 @@ public class listaclientesfragment extends Fragment {
         return view;
     }
 
+    /**
+     * Obtiene el codigo de vinculacion del profesional logueado y busca en Firestore
+     * a todos los usuarios comunes que compartan dicho codigo para refrescar la lista.
+     */
     private void cargarClientesDelProfesional() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
 

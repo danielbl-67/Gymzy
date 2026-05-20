@@ -17,6 +17,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Actividad que representa el panel de control unificado para los perfiles profesionales.
+ * Hereda de {@link menuinferior} y adapta dinámicamente su interfaz gráfica (textos, iconos y títulos)
+ * en tiempo de ejecución para actuar como el entorno de trabajo específico de un "Nutricionista"
+ * o un "Entrenador", permitiendo la gestión de alumnos/pacientes y la asignación de planes.
+ */
 public class panelprofesionalactivity extends menuinferior {
 
     private TextView tvRolBadge, tvCodigoPro, tvTextoAlumnos, tvTextoPlanes;
@@ -29,6 +35,14 @@ public class panelprofesionalactivity extends menuinferior {
     private registrarsesiones sessionManager;
     private String rolUsuario = "";
 
+    /**
+     * Metodo de ciclo de vida que inicializa el panel profesional.
+     * Infla el diseño XML personalizado de la pantalla inicial del profesional,
+     * inicializa los gestores de datos locales y asíncronos, y valida que el usuario mantenga
+     * un token de sesión web activo antes de construir el panel.
+     *
+     * @param savedInstanceState Si la actividad se recrea, este objeto contiene los datos del estado previo.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +69,10 @@ public class panelprofesionalactivity extends menuinferior {
         setupClickListeners();
     }
 
+    /**
+     * Enlaza y mapea las variables globales de la clase con sus respectivos
+     * componentes e identificadores visuales definidos en el archivo de diseño XML.
+     */
     private void initUI() {
         tvRolBadge = findViewById(R.id.tvRolBadge);
         tvCodigoPro = findViewById(R.id.tvCodigoPro);
@@ -68,6 +86,13 @@ public class panelprofesionalactivity extends menuinferior {
         btnsalir = findViewById(R.id.btnCerrarSesion);
     }
 
+    /**
+     * Recupera el documento del profesional desde la colección "Usuarios" en Cloud Firestore
+     * mediante su identificador único (UID). Extrae el código de vinculación y el rol para
+     * dar paso a la personalización de la interfaz.
+     *
+     * @param uid Identificador único del usuario autenticado en Firebase.
+     */
     private void cargarDatosProfesional(String uid) {
         db.collection("Usuarios").document(uid)
                 .get()
@@ -92,6 +117,13 @@ public class panelprofesionalactivity extends menuinferior {
                 });
     }
 
+    /**
+     * Modifica los componentes gráficos en tiempo de ejecución de acuerdo al rol del profesional.
+     * <ul>
+     *   <li>Si es **Nutricionista**: Configura el badge como "PANEL NUTRICIONAL" y orienta las funciones a pacientes y dietas.</li>
+     *   <li>Si es **Entrenador**: Configura el badge como "PANEL DE ENTRENAMIENTO" y orienta las funciones a alumnos y rutinas.</li>
+     * </ul>
+     */
     private void configurarInterfazSegunRol() {
         if ("Nutricionista".equalsIgnoreCase(rolUsuario)) {
             tvRolBadge.setText("PANEL NUTRICIONAL");
@@ -109,6 +141,11 @@ public class panelprofesionalactivity extends menuinferior {
         }
     }
 
+    /**
+     * Define y asigna las acciones de respuesta para los eventos de clic en los botones del panel.
+     * Gestiona la navegación hacia la lista de clientes independientes, el creador de planes
+     * y los disparadores para el cierre de sesión seguro.
+     */
     private void setupClickListeners() {
         btnGestionarAlumnos.setOnClickListener(v -> {
             // ⚡ SOLUCIÓN: Cambiamos el fragmento roto por la Activity independiente escrita en minúsculas
@@ -133,12 +170,21 @@ public class panelprofesionalactivity extends menuinferior {
         }
     }
 
+    /**
+     * Destruye el estado de sesión actual del usuario tanto en los servicios de infraestructura
+     * distribuidos de Firebase Auth como en las cachés y preferencias de almacenamiento local
+     * del dispositivo móvil.
+     */
     private void ejecutarCerrarSesion() {
         mAuth.signOut();
         sessionManager.logout();
         irALogin();
     }
 
+    /**
+     * Levanta la pantalla de autenticación del sistema y purga por completo el histórico
+     * y la pila de ejecución de actividades del sistema operativo para evitar retrocesos accidentales.
+     */
     private void irALogin() {
         Intent intent = new Intent(panelprofesionalactivity.this, autenticacion.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

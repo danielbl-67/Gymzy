@@ -15,22 +15,45 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
+/**
+ * Adaptador para el RecyclerView que gestiona la lista de usuarios desde la vista de administrador.
+ * Permite visualizar los datos de cada usuario y eliminarlos de Firebase Firestore mediante un clic largo.
+ */
 public class usuariosAdminAdapter extends RecyclerView.Adapter<usuariosAdminAdapter.UsuarioViewHolder> {
 
     private List<usuario> listaUsuarios;
 
-    // Interface para notificar al Fragment cuando se elimina un elemento de la lista
+    /**
+     * Interfaz para notificar al Fragment o Activity contenedor cuando se elimina
+     * un elemento de la lista en la base de datos.
+     */
     public interface OnUsuarioEliminadoListener {
+        /**
+         * Evento disparado inmediatamente después de que el usuario ha sido borrado con éxito.
+         */
         void onEliminado();
     }
 
     private OnUsuarioEliminadoListener eliminadoListener;
 
+    /**
+     * Constructor del adaptador.
+     *
+     * @param listaUsuarios     Lista de objetos {@link usuario} que se van a mostrar.
+     * @param eliminadoListener Callback para escuchar los eventos de eliminación.
+     */
     public usuariosAdminAdapter(List<usuario> listaUsuarios, OnUsuarioEliminadoListener eliminadoListener) {
         this.listaUsuarios = listaUsuarios;
         this.eliminadoListener = eliminadoListener;
     }
 
+    /**
+     * Infla el diseño XML para cada fila del RecyclerView y crea el ViewHolder.
+     *
+     * @param parent   El ViewGroup en el que se añadirá la nueva vista después de vincularse a una posición.
+     * @param viewType El tipo de vista de la nueva vista (no se utiliza en este adaptador simple).
+     * @return Una nueva instancia de {@link UsuarioViewHolder} que contiene la vista de la fila.
+     */
     @NonNull
     @Override
     public UsuarioViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -38,6 +61,13 @@ public class usuariosAdminAdapter extends RecyclerView.Adapter<usuariosAdminAdap
         return new UsuarioViewHolder(view);
     }
 
+    /**
+     * Vincula los datos del usuario en la posición especificada con los componentes visuales del ViewHolder.
+     * Configura el texto, los roles y el listener de clic largo para eliminar el registro.
+     *
+     * @param holder   El ViewHolder que debe actualizarse para representar el contenido del elemento.
+     * @param position La posición del elemento dentro de la lista de datos del adaptador.
+     */
     @Override
     public void onBindViewHolder(@NonNull UsuarioViewHolder holder, int position) {
         usuario usuario = listaUsuarios.get(position);
@@ -69,6 +99,15 @@ public class usuariosAdminAdapter extends RecyclerView.Adapter<usuariosAdminAdap
         });
     }
 
+    /**
+     * Muestra un cuadro de diálogo de confirmación de tipo AlertDialog para eliminar al usuario.
+     * Si el administrador confirma, se busca el documento en Firestore usando el correo electrónico,
+     * se borra de la base de datos y se actualiza la lista local de la aplicación.
+     *
+     * @param context  El contexto de la aplicación o actividad necesario para mostrar el diálogo.
+     * @param usuario  El objeto {@link usuario} que se pretende eliminar.
+     * @param position La posición indexada del usuario dentro de la lista para gestionar su remoción.
+     */
     private void mostrarDialogoEliminar(android.content.Context context, usuario usuario, int position) {
         new AlertDialog.Builder(context)
                 .setTitle("Eliminar Cuenta")
@@ -100,14 +139,28 @@ public class usuariosAdminAdapter extends RecyclerView.Adapter<usuariosAdminAdap
                 .show();
     }
 
+    /**
+     * Devuelve el tamaño total de la lista de usuarios que maneja el adaptador.
+     *
+     * @return El número de elementos contenidos en la lista de usuarios.
+     */
     @Override
     public int getItemCount() {
         return listaUsuarios.size();
     }
 
+    /**
+     * Clase contenedora que mantiene las referencias de las vistas de los componentes
+     * de la interfaz de usuario para cada elemento de la lista.
+     */
     public static class UsuarioViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombre, tvRol, tvEmail, tvEdad, tvPeso, tvAltura, tvCodigo;
 
+        /**
+         * Constructor del ViewHolder que inicializa y enlaza los componentes visuales del archivo XML.
+         *
+         * @param itemView La vista raíz del elemento de la lista (item_usuario_admin).
+         */
         public UsuarioViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvItemNombre);

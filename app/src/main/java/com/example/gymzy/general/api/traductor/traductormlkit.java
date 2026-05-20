@@ -10,12 +10,32 @@ import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
 import java.util.Locale;
 
+/**
+ * Utilidad encargada de realizar traducciones de texto utilizando Google ML Kit.
+ * Traduce de ingles a espanol de forma local y asincrona en el dispositivo.
+ */
 public class traductormlkit {
 
+    /**
+     * Interfaz para recibir el resultado de la traduccion asincrona.
+     */
     public interface OnTraduccionListener {
+        /**
+         * Evento disparado cuando el proceso de traduccion finaliza con exito o fallo.
+         *
+         * @param textoTraducido Cadena de texto traducida o el texto original si hubo un fallo.
+         */
         void onResultado(String textoTraducido);
     }
 
+    /**
+     * Traduce una cadena de texto desde el idioma ingles al espanol.
+     * Evalua si el idioma del dispositivo ya es ingles para omitir el proceso, descarga el
+     * modelo de traduccion si es necesario y despacha el resultado de vuelta al hilo principal.
+     *
+     * @param textoOriginal Texto en ingles que se desea traducir.
+     * @param listener      Callback para interceptar el resultado e interactuar con la interfaz.
+     */
     public static void traducir(String textoOriginal, OnTraduccionListener listener) {
         if (textoOriginal == null || textoOriginal.isEmpty()) {
             listener.onResultado("");
@@ -23,7 +43,6 @@ public class traductormlkit {
         }
 
         String idiomaDispositivo = Locale.getDefault().getLanguage();
-        // Si el móvil está en inglés, no traducimos
         if (idiomaDispositivo.equals("en")) {
             listener.onResultado(textoOriginal);
             return;
@@ -41,7 +60,6 @@ public class traductormlkit {
                 .addOnSuccessListener(unused -> {
                     translator.translate(textoOriginal)
                             .addOnSuccessListener(textoTraducido -> {
-                                // Forzamos la respuesta al hilo principal para actualizar la UI
                                 new Handler(Looper.getMainLooper()).post(() -> {
                                     listener.onResultado(textoTraducido);
                                 });

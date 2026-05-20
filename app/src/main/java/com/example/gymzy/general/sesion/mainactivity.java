@@ -17,6 +17,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Actividad principal de la aplicación que gestiona la pantalla de Inicio de Sesión (Login).
+ * Hereda de {@link menuinferior} y se encarga de autenticar a los usuarios mediante una estrategia híbrida:
+ * busca el correo electrónico por alias en Firebase Realtime Database, autentica con Firebase Auth
+ * y enruta dinámicamente según el rol recuperado desde Firebase Firestore.
+ */
 public class mainactivity extends menuinferior {
     private TextInputEditText etUser, etPass;
     private TextInputLayout layUser, layPass;
@@ -24,6 +30,12 @@ public class mainactivity extends menuinferior {
     private registrarsesiones sessionManager;
     private FirebaseFirestore db;
 
+    /**
+     * Metodo de ciclo de vida que inicializa la actividad, configura las instancias de base de datos,
+     * vincula los elementos de la interfaz gráfica y establece el comportamiento del botón de login.
+     *
+     * @param savedInstanceState Contiene el estado previamente guardado de la actividad, si existiera.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +53,15 @@ public class mainactivity extends menuinferior {
         btnLogin.setOnClickListener(v -> iniciarSesion());
     }
 
+    /**
+     * Ejecuta el flujo principal de autenticación en la aplicación.
+     * El proceso consta de los siguientes pasos:
+     *   1. Valida que los campos no estén vacíos.
+     *   2. Consulta en Firebase Realtime Database (nodo "UsuariosLogueo") el correo asociado al nombre de usuario.
+     *   3. Utiliza ese correo junto a la contraseña para autenticar en Firebase Auth.
+     *   4. Almacena el estado de la sesión localmente a través de {@link registrarsesiones}.
+     *   5. Delega la redirección de pantallas al metodo de verificación de roles
+     */
     private void iniciarSesion() {
         String user = etUser.getText().toString().trim().toLowerCase();
         String pass = etPass.getText().toString().trim();
@@ -81,6 +102,15 @@ public class mainactivity extends menuinferior {
                 });
     }
 
+    /**
+     * Consulta los datos de perfil del usuario en la colección "Usuarios" de Cloud Firestore
+     * utilizando su identificador único (UID).
+     * En función del campo "rol" recuperado, redirige al usuario hacia el panel correspondiente:
+     * Si las credenciales de Auth son válidas pero el documento en Firestore no existe,
+     * fuerza la redirección a {@link registroactivity} para completar el formulario obligatorio.
+     *
+     * @param uid El identificador único de usuario de Firebase Auth (UID) para realizar la consulta.
+     */
     private void verificarRolYRedirigir(String uid) {
         // Consultamos la colección unificada de Firestore
         db.collection("Usuarios").document(uid).get()

@@ -18,6 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Actividad que gestiona y despliega el registro historico de marcas de un ejercicio concreto.
+ * Consume datos desde Cloud Firestore ordenados cronologicamente e integra el servicio traductormlkit
+ * para renderizar los titulos traducidos en tiempo de ejecucion.
+ */
 public class historialejercicioactivity extends AppCompatActivity {
 
     private TextView tvTitulo, tvVacio;
@@ -29,6 +34,12 @@ public class historialejercicioactivity extends AppCompatActivity {
     private List<Map<String, Object>> listaDatos;
     private String nombreEjercicioIngles;
 
+    /**
+     * Inicializa los componentes graficos, prepara el adaptador para el RecyclerView
+     * y procesa los parametros del Intent para activar la traduccion y la busqueda en Firestore.
+     *
+     * @param savedInstanceState Contiene el estado previo de los datos de la interfaz.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +80,8 @@ public class historialejercicioactivity extends AppCompatActivity {
     }
 
     /**
-     * Consulta Firestore buscando registros que coincidan con el usuario autenticado y el ejercicio actual
+     * Recupera de Cloud Firestore los documentos que coincidan con el UID del usuario logueado
+     * y la clave del ejercicio actual, ordenandolos por estampa de tiempo descendente.
      */
     private void cargarHistorialDesdeFirestore() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return;

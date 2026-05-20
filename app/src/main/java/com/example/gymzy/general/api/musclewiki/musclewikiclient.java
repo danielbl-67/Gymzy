@@ -11,16 +11,44 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * Cliente de red encargado de descargar de forma asincrona la base de datos completa de ejercicios.
+ * Realiza el procesamiento del JSON, filtra las rutinas segun el grupo muscular especificado
+ * y reconstruye las rutas relativas de las imagenes para transformarlas en URLs absolutas validas.
+ */
 public class musclewikiclient {
 
     private static final String JSON_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json";
     private static final String IMG_BASE_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
 
+    /**
+     * Interfaz de comunicacion (Callback) encargada de despachar la coleccion filtrada de datos
+     * o notificar las incidencias producidas durante la transaccion de red.
+     */
     public interface EjerciciosCallback {
+        /**
+         * Evento disparado cuando la consulta finaliza de forma exitosa y se ha completado el filtrado de datos.
+         *
+         * @param ejercicios Lista refinada de objetos {@link ejerciciomuscle} que coinciden con el criterio de busqueda.
+         */
         void onResponse(List<ejerciciomuscle> ejercicios);
+
+        /**
+         * Evento disparado ante cualquier anomalia en la solicitud HTTP, error de servidor o de parseo JSON.
+         *
+         * @param error Mensaje descriptivo con el detalle tecnico del fallo.
+         */
         void onFailure(String error);
     }
 
+    /**
+     * Descarga la base de datos global de ejercicios en un hilo secundario de forma asincrona.
+     * Evalua secuencialmente el musculo objetivo (Target) de cada elemento y concatena los prefijos
+     * correspondientes a los recursos multimedia locales almacenados en el repositorio remoto.
+     *
+     * @param musculoABuscar Clave en ingles de la zona muscular elegida para realizar el filtrado.
+     * @param callback       Instancia encargada de procesar e interceptar la respuesta de la peticion.
+     */
     public static void getEjerciciosPorMusculo(String musculoABuscar, EjerciciosCallback callback) {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(JSON_URL).build();

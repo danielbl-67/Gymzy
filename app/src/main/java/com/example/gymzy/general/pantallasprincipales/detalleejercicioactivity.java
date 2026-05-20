@@ -9,11 +9,22 @@ import com.bumptech.glide.Glide;
 import com.example.gymzy.R;
 import com.example.gymzy.general.api.traductor.traductormlkit;
 
+/**
+ * Actividad que despliega la ficha tecnica individual y detallada de un ejercicio.
+ * Utiliza Glide para renderizar imagenes desde URLs remotas e integra traductormlkit
+ * para traducir de forma asincrona los titulos y las guias de ejecucion al espanol.
+ */
 public class detalleejercicioactivity extends AppCompatActivity {
 
     private TextView tvTitulo, tvDescripcion;
     private ImageView imgEjercicio;
 
+    /**
+     * Recupera las propiedades del ejercicio inyectadas en el Intent, configura
+     * las vistas y dispara los hilos de traduccion automatica junto con la carga de medios.
+     *
+     * @param savedInstanceState Contiene el estado previo de los datos de la interfaz.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

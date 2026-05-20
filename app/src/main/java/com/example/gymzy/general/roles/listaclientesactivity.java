@@ -16,6 +16,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Actividad que despliega la lista de clientes asociados al profesional logueado.
+ * Carga los usuarios desde Firestore filtrando por el codigo de vinculacion.
+ */
 public class listaclientesactivity extends AppCompatActivity {
 
     private TextView tvTituloHeader;
@@ -25,6 +29,12 @@ public class listaclientesactivity extends AppCompatActivity {
     private List<usuario> listaclientes;
     private clientesadapter adapter;
 
+    /**
+     * Inicializa la actividad, configura el RecyclerView, los listeners de navegacion
+     * y arranca la comprobacion de credenciales y roles.
+     *
+     * @param savedInstanceState Contiene el estado previo de la actividad si existiera.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +65,10 @@ public class listaclientesactivity extends AppCompatActivity {
         verificarRolYBuscarClientes();
     }
 
+    /**
+     * Valida la sesion del profesional en Firebase y obtiene su rol y codigo de vinculacion
+     * para adaptar el encabezado de la pantalla.
+     */
     private void verificarRolYBuscarClientes() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             Toast.makeText(this, "Sesión no válida", Toast.LENGTH_SHORT).show();
@@ -90,6 +104,12 @@ public class listaclientesactivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Consulta Firestore para extraer los usuarios con rol "Usuario" vinculados al codigo dado
+     * e inyecta los resultados en el adaptador del RecyclerView.
+     *
+     * @param codigoVinculacion Codigo identificador del profesional para realizar el filtro.
+     */
     private void obtenerUsuariosVinculados(String codigoVinculacion) {
         db.collection("Usuarios")
                 .whereEqualTo("codigoVinculacion", codigoVinculacion)
