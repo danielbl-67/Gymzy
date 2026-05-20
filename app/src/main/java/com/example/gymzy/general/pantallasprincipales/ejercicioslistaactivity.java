@@ -3,7 +3,6 @@ package com.example.gymzy.general.pantallasprincipales;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +12,6 @@ import com.example.gymzy.R;
 import com.example.gymzy.general.api.musclewiki.ejerciciomuscle;
 import com.example.gymzy.general.api.musclewiki.ejerciciosadapter;
 import com.example.gymzy.general.api.musclewiki.musclewikiclient;
-
 import java.util.List;
 
 public class ejercicioslistaactivity extends AppCompatActivity {
@@ -26,44 +24,40 @@ public class ejercicioslistaactivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ejercicios_lista); // TU XML
+        setContentView(R.layout.activity_ejercicios_lista);
 
         rvEjercicios = findViewById(R.id.rvEjerciciosGenericos);
         tvTitulo = findViewById(R.id.tvTituloCategoria);
         btnVolver = findViewById(R.id.btnVolverLista);
-        btnVolver.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(ejercicioslistaactivity.this, homeactivity.class);
-                startActivity(intent);
-            }
-        });
+
         String musculoSeleccionado = getIntent().getStringExtra("TITULO_MUSCULO");
         tvTitulo.setText(musculoSeleccionado);
 
         rvEjercicios.setLayoutManager(new LinearLayoutManager(this));
 
-        // Traducción para la búsqueda (El JSON está en inglés)
-        String musculoBusqueda = traducir(musculoSeleccionado);
+        // Mapeamos para la API
+        String musculoParaApi = mapearMusculo(musculoSeleccionado);
 
-        musclewikiclient.getEjerciciosPorMusculo(musculoBusqueda, new musclewikiclient.EjerciciosCallback() {
+        musclewikiclient.getEjerciciosPorMusculo(musculoParaApi, new musclewikiclient.EjerciciosCallback() {
             @Override
             public void onResponse(List<ejerciciomuscle> ejercicios) {
                 runOnUiThread(() -> {
                     adapter = new ejerciciosadapter(ejercicios, ejercicioslistaactivity.this);
                     rvEjercicios.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
                 });
             }
 
             @Override
             public void onFailure(String error) {
-                Log.e("GYMZY_API", "Fallo: " + error);
+                Log.e("GYMZY_API", "Error: " + error);
             }
         });
+
+        btnVolver.setOnClickListener(v -> finish());
     }
 
-    private String traducir(String esp) {
+    private String mapearMusculo(String esp) {
+        if (esp == null) return "chest";
         switch (esp) {
             case "Pecho": return "chest";
             case "Espalda": return "back";
@@ -73,7 +67,7 @@ public class ejercicioslistaactivity extends AppCompatActivity {
             case "Piernas": return "quads";
             case "Glúteos": return "glutes";
             case "Abdominales": return "abs";
-            default: return esp;
+            default: return esp.toLowerCase();
         }
     }
 }

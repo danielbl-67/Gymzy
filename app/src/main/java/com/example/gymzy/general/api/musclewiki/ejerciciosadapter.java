@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.gymzy.R;
+import com.example.gymzy.general.api.traductor.traductormlkit;
 import com.example.gymzy.general.pantallasprincipales.detalleejercicioactivity;
-
 import java.util.List;
 
 public class ejerciciosadapter extends RecyclerView.Adapter<ejerciciosadapter.ViewHolder> {
@@ -35,16 +35,23 @@ public class ejerciciosadapter extends RecyclerView.Adapter<ejerciciosadapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ejerciciomuscle ej = lista.get(position);
+
+        // Ponemos el nombre en inglés mientras la traducción llega
         holder.tvNombre.setText(ej.getName());
+
+        // Traducimos el nombre
+        traductormlkit.traducir(ej.getName(), textoTraducido -> {
+            holder.tvNombre.setText(textoTraducido);
+        });
 
         Glide.with(context)
                 .load(ej.getVideoUrl())
                 .placeholder(R.drawable.ic_logoredondo)
                 .into(holder.ivImagen);
 
-        // Al hacer click, enviamos los datos al detalle
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, detalleejercicioactivity.class);
+            // Pasamos los originales, la actividad de detalle se encargará de traducir al abrirse
             intent.putExtra("nombre", ej.getName());
             intent.putExtra("imagen", ej.getVideoUrl());
             intent.putExtra("descripcion", ej.getStepsFormatted());
@@ -53,12 +60,11 @@ public class ejerciciosadapter extends RecyclerView.Adapter<ejerciciosadapter.Vi
     }
 
     @Override
-    public int getItemCount() { return lista.size(); }
+    public int getItemCount() { return lista != null ? lista.size() : 0; }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombre;
         ImageView ivImagen;
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvNombreEjercicio);
