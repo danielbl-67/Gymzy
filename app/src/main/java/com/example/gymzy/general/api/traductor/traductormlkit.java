@@ -1,5 +1,7 @@
 package com.example.gymzy.general.api.traductor;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import com.google.mlkit.common.model.DownloadConditions;
 import com.google.mlkit.nl.translate.TranslateLanguage;
@@ -8,60 +10,67 @@ import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
 import java.util.Locale;
 
+/**
+ * Utilidad encargada de realizar traducciones de texto utilizando Google ML Kit.
+ * Traduce de ingles a espanol de forma local y asincrona en el dispositivo.
+ */
 public class traductormlkit {
 
+    /**
+     * Interfaz para recibir el resultado de la traduccion asincrona.
+     */
     public interface OnTraduccionListener {
+        /**
+         * Evento disparado cuando el proceso de traduccion finaliza con exito o fallo.
+         *
+         * @param textoTraducido Cadena de texto traducida o el texto original si hubo un fallo.
+         */
         void onResultado(String textoTraducido);
     }
 
     /**
-     * Traduce cualquier texto de la API (Inglés) al idioma del móvil (Español u otros)
+     * Traduce una cadena de texto desde el idioma ingles al espanol.
+     * Evalua si el idioma del dispositivo ya es ingles para omitir el proceso, descarga el
+     * modelo de traduccion si es necesario y despacha el resultado de vuelta al hilo principal.
+     *
+     * @param textoOriginal Texto en ingles que se desea traducir.
+     * @param listener      Callback para interceptar el resultado e interactuar con la interfaz.
      */
     public static void traducir(String textoOriginal, OnTraduccionListener listener) {
-        // 1. Detectar el idioma del teléfono del usuario
-        String idiomaDispositivo = Locale.getDefault().getLanguage();
+        if (textoOriginal == null || textoOriginal.isEmpty()) {
+            listener.onResultado("");
+            return;
+        }
 
-        // 2. Si el móvil ya está en inglés, no gastamos batería ni datos traduciendo, devolvemos el original
-        if (idiomaDispositivo.equals("en") || textoOriginal == null || textoOriginal.isEmpty()) {
+        String idiomaDispositivo = Locale.getDefault().getLanguage();
+        if (idiomaDispositivo.equals("en")) {
             listener.onResultado(textoOriginal);
             return;
         }
 
-        // 3. Configurar las opciones: Origen Inglés -> Destino Español (o el idioma detectado)
-        String idiomaDestinoCode = idiomaDispositivo.equals("es") ? TranslateLanguage.SPANISH : TranslateLanguage.ENGLISH;
-
         TranslatorOptions options = new TranslatorOptions.Builder()
                 .setSourceLanguage(TranslateLanguage.ENGLISH)
-                .setTargetLanguage(idiomaDestinoCode)
+                .setTargetLanguage(TranslateLanguage.SPANISH)
                 .build();
 
         final Translator translator = Translation.getClient(options);
-
-        // 4. Configurar condiciones de descarga del paquete de idioma (Solo pesa unos 30MB la primera vez)
-        DownloadConditions conditions = new DownloadConditions.Builder()
-                .requireWifi() // Opcional: puedes quitar esto si quieres que descargue también con datos móviles
-                .build();
-
-        Log.d("GYMZY_MLKIT", "Comprobando paquete de idioma...");
+        DownloadConditions conditions = new DownloadConditions.Builder().build();
 
         translator.downloadModelIfNeeded(conditions)
                 .addOnSuccessListener(unused -> {
-                    // El paquete ya está listo en el móvil, procedemos a traducir en local (sin internet)
                     translator.translate(textoOriginal)
                             .addOnSuccessListener(textoTraducido -> {
-                                listener.onResultado(textoTraducido);
-                                translator.close(); // Cerramos el traductor para liberar memoria RAM
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    listener.onResultado(textoTraducido);
+                                });
                             })
                             .addOnFailureListener(e -> {
-                                Log.e("GYMZY_MLKIT", "Error al traducir texto: " + e.getMessage());
-                                listener.onResultado(textoOriginal); // Si falla, muestra el original en inglés para que no quede vacío
-                                translator.close();
+                                new Handler(Looper.getMainLooper()).post(() -> listener.onResultado(textoOriginal));
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("GYMZY_MLKIT", "Error al descargar el modelo de idioma: " + e.getMessage());
-                    listener.onResultado(textoOriginal); // Respaldo en inglés
-                    translator.close();
+                    Log.e("GYMZY_MLKIT", "Error de descarga: " + e.getMessage());
+                    new Handler(Looper.getMainLooper()).post(() -> listener.onResultado(textoOriginal));
                 });
     }
 }

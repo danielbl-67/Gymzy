@@ -2,18 +2,49 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ======================================================================= -->
+    <!--                          PERMISOS DE RED Y HARDWARE                     -->
+    <!-- ======================================================================= -->
+
+    <!-- Permite que la app realice solicitudes HTTP a Firebase y APIs externas (MuscleWiki, OpenFoodFacts) -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Permite acceder al sensor de hardware TYPE_STEP_COUNTER para el conteo de pasos diario -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <!-- Acceso al almacenamiento local para versiones anteriores a Android 13 (API 33) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- Acceso selectivo a fotos para la personalización de la imagen de perfil en Android 13 o superior -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
+    <!-- ======================================================================= -->
+    <!--                      PERMISOS DE INTEGRACIÓN CON HEALTH CONNECT         -->
+    <!-- ======================================================================= -->
+
+    <!-- Permite leer métricas de pasos compartidas por el sistema de salud de Android -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
+
+    <!-- Permite registrar entrenamientos y actividades deportivas en el almacén de salud -->
     <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
 
+    <!-- ======================================================================= -->
+    <!--                       QUERIES (VISIBILIDAD DE PAQUETES)                 -->
+    <!-- ======================================================================= -->
     <queries>
+        <!-- Permite interactuar con acciones de búsqueda globales del sistema -->
+        <intent>
+            <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
+        </intent>
+        <!-- Visibilidad obligatoria para conectar de forma segura con la app de Health Connect -->
         <package android:name="com.google.android.apps.healthdata" />
+        <!-- Visibilidad obligatoria para interactuar con los servicios del sistema de Google Play Services -->
+        <package android:name="com.google.android.gms" />
     </queries>
 
+    <!-- ======================================================================= -->
+    <!--                         CONFIGURACIÓN DE LA APLICACIÓN                  -->
+    <!-- ======================================================================= -->
     <application
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
@@ -25,6 +56,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GYMZY">
 
+        <!-- ======================================================================= -->
+        <!-- MÓDULO: SESIÓN Y AUTENTICACIÓN (.general.sesion)                         -->
+        <!-- ======================================================================= -->
+
+        <!-- Pantalla de Bienvenida / Control de acceso principal de la aplicación -->
         <activity
             android:name=".general.sesion.autenticacion"
             android:exported="true">
@@ -38,20 +74,47 @@
         <activity android:name=".general.sesion.iniciosesion" android:exported="false" />
         <activity android:name=".general.sesion.registroactivity" android:exported="false" />
 
+        <!-- ======================================================================= -->
+        <!-- MÓDULO: PANTALLAS PRINCIPALES (.general.pantallasprincipales)            -->
+        <!-- ======================================================================= -->
+
+        <!-- Panel de control central (Dashboard) del usuario común -->
         <activity android:name=".general.pantallasprincipales.homeactivity" android:exported="false" />
 
-        <activity android:name=".general.roles.panelprofesionalactivity" android:exported="false" />
-
-        <activity android:name=".general.roles.paneladminactivity" android:exported="false" />
-
+        <!-- Gestión y catálogo de ejercicios y rutinas -->
         <activity android:name=".general.pantallasprincipales.listarutina" android:exported="false" />
         <activity android:name=".general.pantallasprincipales.detalleejercicioactivity" android:exported="false" />
         <activity android:name=".general.pantallasprincipales.ejercicioslistaactivity" android:exported="false" />
 
+        <!-- Ajustes de usuario, pasarela de pago y calculadora de nutrición -->
         <activity android:name=".general.pantallasprincipales.configuracionactivity" android:exported="false" />
         <activity android:name=".general.pantallasprincipales.precios" android:exported="false" />
         <activity android:name=".general.pantallasprincipales.consulta" android:exported="false" />
-        <activity android:name=".general.pantallasprincipales.historialejercicioactivity" android:exported="false" android:screenOrientation="portrait" />
+
+        <!-- Historial cronológico bloqueado en orientación vertical para mantener la estética del gráfico -->
+        <activity
+            android:name=".general.pantallasprincipales.historialejercicioactivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- ======================================================================= -->
+        <!-- MÓDULO: ROLES Y ADMINISTRACIÓN (.general.roles)                          -->
+        <!-- ======================================================================= -->
+
+        <!-- Panel de herramientas para el Entrenador / Nutriólogo profesional -->
+        <activity android:name=".general.roles.panelprofesionalactivity" android:exported="false" />
+
+        <!-- Panel de control total del sistema para administradores -->
+        <activity android:name=".general.roles.paneladminactivity" android:exported="false" />
+
+        <!-- Listado de clientes asignados con estilo visual limpio sin barra de acción nativa -->
+        <activity
+            android:name=".general.roles.listaclientesactivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+
+        <!-- ======================================================================= -->
+        <!-- RECURSOS COMPARTIDOS Y METADATOS                                        -->
+        <!-- ======================================================================= -->
         <meta-data android:name="preloaded_fonts" android:resource="@array/preloaded_fonts" />
 
     </application>

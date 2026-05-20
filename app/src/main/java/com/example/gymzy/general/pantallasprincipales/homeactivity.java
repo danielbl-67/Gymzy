@@ -16,7 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -38,6 +40,11 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Actividad principal del usuario comun que gestiona el panel de control (Dashboard).
+ * Monitorea el contador de pasos mediante sensores de hardware, registra la ingesta de agua
+ * y sincroniza las metricas diarias con Firebase Realtime Database.
+ */
 public class homeactivity extends menuinferior implements SensorEventListener {
 
     private registrarsesiones sessionManager;
@@ -49,12 +56,19 @@ public class homeactivity extends menuinferior implements SensorEventListener {
     private ProgressBar pbSteps;
     private TextView tvL, tvM, tvX, tvJ, tvV;
     private View barMon, barTue, barWed, barThu, barFri;
+    private ScrollView scrollViewPrincipal;
 
     private float litrosActuales = 0.0f;
     private final float OBJETIVO_AGUA = 2.5f;
     private int pasosIniciales = -1;
     private int pasosDeHoy = 0;
 
+    /**
+     * Inicializa componentes, gestores de datos, enlace de sensores de hardware
+     * y solicita permisos en tiempo de ejecucion para el reconocimiento de actividad fisica.
+     *
+     * @param savedInstanceState Estado previamente almacenado de la instancia.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,10 +89,22 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         }
 
         actualizarFecha();
-        sincronizarConFirebase(); // Descarga datos de la nube al iniciar
+        sincronizarConFirebase();
     }
 
+    /**
+     * Enlaza las vistas del XML, gestiona las acciones de los botones de progreso,
+     * scroll automatico, comparticion social y cierre de sesion.
+     */
     private void initUI() {
+        scrollViewPrincipal = (ScrollView) findViewById(android.R.id.content).getRootView().findViewWithTag("scroll_view_principal");
+        if (scrollViewPrincipal == null) {
+            View v = findViewById(R.id.tvWelcomeUser);
+            if (v != null && v.getParent() != null && v.getParent().getParent() instanceof ScrollView) {
+                scrollViewPrincipal = (ScrollView) v.getParent().getParent();
+            }
+        }
+
         tvWaterCount = findViewById(R.id.tvWaterCount);
         tvCurrentDate = findViewById(R.id.tvCurrentDate);
         tvWalkingTime = findViewById(R.id.tvWalkingTime);
@@ -100,42 +126,52 @@ public class homeactivity extends menuinferior implements SensorEventListener {
 
         TextView tvWelcome = findViewById(R.id.tvWelcomeUser);
         Button btnAddWater = findViewById(R.id.btnAddWater);
-        Button btnMusculos = findViewById(R.id.btnMusculos);
+
+        Button btnVerHistorial = findViewById(R.id.btnVerHistorial);
+        Button btnCompartirProgreso = findViewById(R.id.btnCompartirProgreso);
 
         tvWelcome.setText("¡Hola, " + (sessionManager.getUsername() != null ? sessionManager.getUsername() : "Atleta") + "!");
-        btnMusculos.setOnClickListener(v -> startActivity(new Intent(this, listarutina.class)));
+
+        btnVerHistorial.setOnClickListener(v -> {
+            if (scrollViewPrincipal != null) {
+                scrollViewPrincipal.post(() -> scrollViewPrincipal.smoothScrollTo(0, barMon.getTop()));
+            }
+        });
+
+        btnCompartirProgreso.setOnClickListener(v -> {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "¡Hoy he dado " + pasosDeHoy + " pasos en GYMZY! Sigue mi ritmo.");
+            sendIntent.setType("text/plain");
+            Intent shareIntent = Intent.createChooser(sendIntent, null);
+            startActivity(shareIntent);
+        });
 
         Button btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
-
-        // Evento para cerrar sesión
-        btnCerrarSesion.setOnClickListener(v -> {
-            cerrarSesion();
-        });
+        btnCerrarSesion.setOnClickListener(v -> cerrarSesion());
 
         btnAddWater.setOnClickListener(v -> {
             litrosActuales += 0.25f;
             actualizarUIActividad();
-            guardarProgresoEnFirebase(); // Guarda el agua en tiempo real
+            guardarProgresoEnFirebase();
         });
     }
+
+    /**
+     * Termina la sesion activa en Firebase Auth, limpia las preferencias locales y redirige a la pantalla de login.
+     */
     private void cerrarSesion() {
-        // 1. Cerrar sesión en Firebase Auth
         FirebaseAuth.getInstance().signOut();
-
-        // 2. Limpiar SharedPreferences a través de tu SessionManager
         sessionManager.logout();
-
-        // 3. Redirigir a la pantalla de Auth o Login
-        // (Asegúrate de cambiar 'AuthActivity.class' por el nombre de tu clase de inicio)
         Intent intent = new Intent(homeactivity.this, autenticacion.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Limpia el historial de pantallas
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-
-        finish(); // Cierra la actividad actual
+        finish();
     }
 
-    // --- Lógica de Sincronización Firebase ---
-
+    /**
+     * Envia los datos acumulados del dia (pasos, agua y calorias calculadas) a Firebase Realtime Database.
+     */
     private void guardarProgresoEnFirebase() {
         String userId = sessionManager.getUsername();
         if (userId == null) return;
@@ -148,6 +184,9 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         mDatabase.child("Usuarios").child(userId).child("actividad_hoy").setValue(actividadHoy);
     }
 
+    /**
+     * Recupera de Firebase la informacion de la ingesta de agua guardada previamente para el dia en curso.
+     */
     private void sincronizarConFirebase() {
         String userId = sessionManager.getUsername();
         if (userId == null) return;
@@ -156,7 +195,6 @@ public class homeactivity extends menuinferior implements SensorEventListener {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // Si hay datos en Firebase (ej. abres la app en otro móvil), los carga
                     Double agua = snapshot.child("agua").getValue(Double.class);
                     if (agua != null) litrosActuales = agua.floatValue();
                     actualizarUIActividad();
@@ -167,6 +205,9 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         });
     }
 
+    /**
+     * Refresca los indicadores textuales y la barra de progreso de pasos y agua en la pantalla.
+     */
     private void actualizarUIActividad() {
         tvWaterCount.setText(String.format(Locale.getDefault(), "%.2fL / %.1fL", litrosActuales, OBJETIVO_AGUA));
         tvStepCount.setText(String.format(Locale.getDefault(), "%d\npasos", pasosDeHoy));
@@ -175,8 +216,9 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         tvWalkingTime.setText(String.format(Locale.getDefault(), "%d\nmin", pasosDeHoy / 100));
     }
 
-    // --- Lógica de Historial y Gráfica ---
-
+    /**
+     * Carga del almacenamiento local SharedPreferences el historico de pasos para resaltar los dias completados.
+     */
     private void cargarHistorial() {
         SharedPreferences prefs = getSharedPreferences("GymzyHistory", MODE_PRIVATE);
         int[] diasCalendar = {Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
@@ -192,6 +234,9 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         }
     }
 
+    /**
+     * Modifica las dimensiones de las vistas de barra para representar graficamente los pasos semanales.
+     */
     private void actualizarGrafica() {
         SharedPreferences prefs = getSharedPreferences("GymzyHistory", MODE_PRIVATE);
         View[] barras = {barMon, barTue, barWed, barThu, barFri};
@@ -210,6 +255,9 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         }
     }
 
+    /**
+     * Verifica el cambio de dia; si la fecha cambio, respalda los datos de ayer en Firebase y reinicia los contadores locales.
+     */
     private void checkDailyReset() {
         SharedPreferences prefs = getSharedPreferences("GymzyHistory", MODE_PRIVATE);
         String lastDate = prefs.getString("last_date", "");
@@ -222,10 +270,8 @@ public class homeactivity extends menuinferior implements SensorEventListener {
                 cal.add(Calendar.DATE, -1);
                 String diaAyer = new SimpleDateFormat("EEE", Locale.US).format(cal.getTime());
 
-                // Guardar en Local
                 prefs.edit().putInt(diaAyer, pasosDeHoy).apply();
 
-                // Guardar en Firebase el histórico antes de borrar
                 if (userId != null) {
                     mDatabase.child("Usuarios").child(userId).child("historial").child(lastDate).child("pasos").setValue(pasosDeHoy);
                 }
@@ -235,11 +281,16 @@ public class homeactivity extends menuinferior implements SensorEventListener {
             litrosActuales = 0.0f;
             prefs.edit().putString("last_date", currentDate).apply();
 
-            // Limpiar datos de hoy en Firebase para el nuevo día
             if (userId != null) mDatabase.child("Usuarios").child(userId).child("actividad_hoy").removeValue();
         }
     }
 
+    /**
+     * Mapea una constante de dia de Calendar con su respectivo componente TextView.
+     *
+     * @param calendarDay Codigo del dia de la semana de java.util.Calendar.
+     * @return El TextView correspondiente al dia de la semana, o null si no aplica.
+     */
     private TextView getTextViewPorDia(int calendarDay) {
         switch (calendarDay) {
             case Calendar.MONDAY: return tvL;
@@ -251,6 +302,9 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         }
     }
 
+    /**
+     * Destaca de forma visual (colores y tipografia) el dia actual de la semana en la interfaz.
+     */
     private void marcarDiaActual() {
         Calendar calendar = Calendar.getInstance();
         TextView hoy = getTextViewPorDia(calendar.get(Calendar.DAY_OF_WEEK));
@@ -261,11 +315,19 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         }
     }
 
+    /**
+     * Formatea e inyecta la fecha actual con la primera letra en mayuscula en el banner de la pantalla.
+     */
     private void actualizarFecha() {
         String date = new SimpleDateFormat("EEEE, d MMM", Locale.getDefault()).format(new Date());
         tvCurrentDate.setText(date.substring(0, 1).toUpperCase() + date.substring(1));
     }
 
+    /**
+     * Recibe las actualizaciones de los sensores de hardware; calcula los pasos netos dados en el dia actual.
+     *
+     * @param event Objeto con los datos capturados del sensor.
+     */
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
@@ -273,16 +335,21 @@ public class homeactivity extends menuinferior implements SensorEventListener {
             pasosDeHoy = (int) event.values[0] - pasosIniciales;
             actualizarUIActividad();
 
-            // Cada 100 pasos guardamos en Firebase para no saturar la red
             if (pasosDeHoy % 100 == 0) {
                 guardarProgresoEnFirebase();
             }
         }
     }
 
+    /**
+     * Evento disparado al cambiar la precision del sensor (no implementado).
+     */
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
+    /**
+     * Registra los escuchadores del sensor de pasos y refresca graficas al volver a primer plano.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -293,10 +360,13 @@ public class homeactivity extends menuinferior implements SensorEventListener {
         if (stepSensor != null) sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_UI);
     }
 
+    /**
+     * Remueve los listeners de hardware para mitigar el drenaje de bateria y respalda los ultimos datos.
+     */
     @Override
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
-        guardarProgresoEnFirebase(); // Guardar antes de salir
+        guardarProgresoEnFirebase();
     }
 }

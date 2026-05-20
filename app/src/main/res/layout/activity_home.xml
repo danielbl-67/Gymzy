@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
-            app:cardBackgroundColor="@color/fondo"
+            app:cardBackgroundColor="#1A1A1A"
             app:cardCornerRadius="15dp"
             app:cardElevation="8dp">
             <LinearLayout
@@ -45,40 +45,41 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="RUTINA DE HOY"
+                    android:text="ACTIVIDAD DIARIA"
                     android:textColor="#FFD700"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.1" />
                 <TextView
+                    android:id="@+id/tvTituloPasos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pecho y Tríceps"
+                    android:text="¡Muévete un poco más hoy!"
                     android:textColor="@android:color/white"
                     android:textSize="24sp"
                     android:textStyle="bold" />
                 <Button
-                    android:id="@+id/btnEmpezarRutina"
+                    android:id="@+id/btnVerHistorial"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
-                    android:text="EMPEZAR AHORA"
+                    android:text="VER HISTORIAL"
                     android:backgroundTint="@android:color/white"
                     android:textColor="@color/negro_app"
                     android:textStyle="bold"
                     app:cornerRadius="10dp" />
                 <Button
-                    android:id="@+id/btnMusculos"
+                    android:id="@+id/btnCompartirProgreso"
                     android:layout_width="match_parent"
                     android:layout_height="65dp"
                     android:layout_marginTop="12dp"
                     android:backgroundTint="#252525"
                     android:gravity="center_vertical|start"
                     android:paddingStart="25dp"
-                    android:text="EXPLORAR MÚSCULOS"
+                    android:text="COMPARTIR PROGRESO"
                     android:textColor="@android:color/white"
                     app:cornerRadius="15dp"
-                    app:icon="@android:drawable/ic_menu_directions"
+                    app:icon="@android:drawable/ic_menu_share"
                     app:iconPadding="15dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>

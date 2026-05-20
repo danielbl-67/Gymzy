@@ -18,13 +18,25 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Activity encargada del registro y configuración inicial del perfil de usuario.
+ * Permite capturar datos personales, físicos y de rol (Usuario, Nutricionista, Entrenador, Admin)
+ * adaptando dinámicamente el formulario visible y guardando la información en Firebase Firestore.
+ */
 public class registroactivity extends AppCompatActivity {
-    private TextInputEditText etNom, etEd, etPe, etAl, etCodPro; // ⚡ Añadido etCodPro
+    private TextInputEditText etNom, etEd, etPe, etAl, etCodPro;
     private AutoCompleteTextView spGen, spObj, spAct, spRol;
     private MaterialButton btnFin;
     private FirebaseFirestore db;
-    private TextInputLayout layEdad, layPeso, layAltura, layGenero, layObjetivo, layActividad, layCodPro; // ⚡ Añadido layCodPro
+    private TextInputLayout layEdad, layPeso, layAltura, layGenero, layObjetivo, layActividad, layCodPro;
 
+    /**
+     * Método de ciclo de vida que inicializa la actividad, vincula las vistas del XML,
+     * configura los menús desplegables (spinners) y establece los listeners de eventos.
+     *
+     * @param savedInstanceState Si la actividad se vuelve a inicializar después de cerrarse previamente,
+     *                           este Bundle contiene los datos que suministró más recientemente.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +49,7 @@ public class registroactivity extends AppCompatActivity {
         etEd = findViewById(R.id.etEdad);
         etPe = findViewById(R.id.etPeso);
         etAl = findViewById(R.id.etAltura);
-        etCodPro = findViewById(R.id.etCodigoProfesional); // ⚡ Asegúrate de añadir este ID en tu XML
+        etCodPro = findViewById(R.id.etCodigoProfesional);
         spGen = findViewById(R.id.spGenero);
         spObj = findViewById(R.id.spObjetivo);
         spAct = findViewById(R.id.spActividad);
@@ -52,8 +64,10 @@ public class registroactivity extends AppCompatActivity {
         layObjetivo = (TextInputLayout) spObj.getParent().getParent();
         layActividad = (TextInputLayout) spAct.getParent().getParent();
         layCodPro = (TextInputLayout) etCodPro.getParent().getParent();
+
         setupSpinners();
 
+        // Listener para adaptar el formulario en tiempo real según el rol seleccionado
         spRol.setOnItemClickListener((parent, view, position, id) -> {
             String rolSeleccionado = parent.getItemAtPosition(position).toString();
             adaptarFormularioPorRol(rolSeleccionado);
@@ -62,6 +76,10 @@ public class registroactivity extends AppCompatActivity {
         btnFin.setOnClickListener(v -> guardarEnFirestore());
     }
 
+    /**
+     * Configura y llena los adaptadores de los menús desplegables (AutoCompleteTextView)
+     * con las opciones predefinidas para género, objetivos, actividad física y roles del sistema.
+     */
     private void setupSpinners() {
         String[] generos = {"Hombre", "Mujer", "Otro"};
         String[] objetivos = {"Perder peso", "Mantener peso", "Ganar masa muscular"};
@@ -75,20 +93,22 @@ public class registroactivity extends AppCompatActivity {
     }
 
     /**
-     * Oculta o muestra las secciones métricas del formulario según el rol
+     * Alterna la visibilidad de los campos del formulario según el rol seleccionado.
+     * Si el rol es "Usuario", se exigen las métricas físicas y el código de vinculación.
+     * Para roles profesionales o administrativos, se ocultan estas secciones.
+     *
+     * @param rol El nombre del rol seleccionado por el usuario en el spinner de roles.
      */
     private void adaptarFormularioPorRol(String rol) {
         if (rol.equalsIgnoreCase("Usuario")) {
-            // Si es un usuario común, necesita el perfil físico y habilitamos el campo opcional del código pro
             layEdad.setVisibility(View.VISIBLE);
             layPeso.setVisibility(View.VISIBLE);
             layAltura.setVisibility(View.VISIBLE);
             layGenero.setVisibility(View.VISIBLE);
             layObjetivo.setVisibility(View.VISIBLE);
             layActividad.setVisibility(View.VISIBLE);
-            layCodPro.setVisibility(View.VISIBLE); // ⚡ Se muestra para el cliente común
+            layCodPro.setVisibility(View.VISIBLE);
         } else {
-            // Si es Admin, Nutri o Entrenador
             layEdad.setVisibility(View.GONE);
             layPeso.setVisibility(View.GONE);
             layAltura.setVisibility(View.GONE);
@@ -99,6 +119,13 @@ public class registroactivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Valida los datos ingresados en el formulario y, si todo es correcto, registra el perfil
+     * del usuario en la colección "Usuarios" de Firebase Firestore usando su UID de autenticación.
+     * <p>
+     * Si el rol es profesional (Nutricionista/Entrenador), genera de forma automática un código de
+     * vinculación aleatorio. Finalmente, redirige al usuario a su panel correspondiente según su rol.
+     */
     private void guardarEnFirestore() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             Toast.makeText(this, "Sesión no válida", Toast.LENGTH_SHORT).show();
@@ -118,14 +145,13 @@ public class registroactivity extends AppCompatActivity {
 
         boolean esUsuarioComun = rolSeleccionado.equalsIgnoreCase("Usuario");
 
-        // Extraer variables del perfil del usuario
         String edadStr = etEd.getText().toString().trim();
         String pesoStr = etPe.getText().toString().trim();
         String alturaStr = etAl.getText().toString().trim();
         String genero = spGen.getText().toString().trim();
         String objetivo = spObj.getText().toString().trim();
         String actividad = spAct.getText().toString().trim();
-        String codigoVinculacion = etCodPro.getText().toString().trim().toUpperCase(); // ⚡ Extraemos el código ingresado
+        String codigoVinculacion = etCodPro.getText().toString().trim().toUpperCase();
 
         if (esUsuarioComun && (edadStr.isEmpty() || pesoStr.isEmpty() || alturaStr.isEmpty() || genero.isEmpty() || objetivo.isEmpty() || actividad.isEmpty())) {
             Toast.makeText(this, "Por favor, completa todo tu perfil físico", Toast.LENGTH_SHORT).show();
@@ -135,22 +161,21 @@ public class registroactivity extends AppCompatActivity {
         try {
             btnFin.setEnabled(false);
 
-            // Valores por defecto para profesionales/admins que no guardan métricas corporales
             int edad = esUsuarioComun ? Integer.parseInt(edadStr) : 0;
             double peso = esUsuarioComun ? Double.parseDouble(pesoStr) : 0.0;
             double altura = esUsuarioComun ? Double.parseDouble(alturaStr) : 0.0;
+
             if (!esUsuarioComun) {
                 genero = "N/A";
                 objetivo = "N/A";
                 actividad = "N/A";
 
-                // Si es Profesional (Nutri/Entrenador), la app genera SU PROPIO código para que otros lo usen
+                // Generación automática de código único para perfiles profesionales
                 if (rolSeleccionado.equalsIgnoreCase("Nutricionista") || rolSeleccionado.equalsIgnoreCase("Entrenador")) {
                     codigoVinculacion = rolSeleccionado.substring(0, 3).toUpperCase() + "-" + (int) (Math.random() * 9000 + 1000);
                 }
             }
 
-            // Instancia del modelo unificado guardando el código (propio o del profesional vinculado)
             usuario u = new usuario(
                     nombre, edad, peso, altura, genero, objetivo, actividad,
                     rolSeleccionado, email, codigoVinculacion
@@ -161,6 +186,7 @@ public class registroactivity extends AppCompatActivity {
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "¡Perfil creado con éxito!", Toast.LENGTH_SHORT).show();
 
+                        // Enrutamiento dinámico según el rol asignado
                         Intent intent;
                         if (finalRol.equalsIgnoreCase("Nutricionista") || finalRol.equalsIgnoreCase("Entrenador")) {
                             intent = new Intent(this, panelprofesionalactivity.class);

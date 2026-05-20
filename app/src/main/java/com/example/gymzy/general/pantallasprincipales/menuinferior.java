@@ -14,6 +14,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Clase abstracta base que implementa el menu de navegacion inferior (BottomNavigationView).
+ * Modifica de forma dinamica los iconos, titulos y rutas de los botones segun el rol del usuario logueado.
+ */
 public abstract class menuinferior extends AppCompatActivity {
 
     protected BottomNavigationView bottomNavigationView;
@@ -21,6 +25,12 @@ public abstract class menuinferior extends AppCompatActivity {
     private FirebaseFirestore db;
     private String rolUsuario = "Usuario";
 
+    /**
+     * Reemplaza el contenedor base, infla el diseño del menu inferior, inicializa los servicios
+     * de Firebase y configura los escuchadores de seleccion de items.
+     *
+     * @param view Vista de la actividad hija que se acoplara dentro del contenedor principal.
+     */
     @Override
     public void setContentView(View view) {
         View baseLayout = getLayoutInflater().inflate(R.layout.activity_drawer_base, null);
@@ -42,6 +52,10 @@ public abstract class menuinferior extends AppCompatActivity {
         });
     }
 
+    /**
+     * Consulta el rol del usuario en Cloud Firestore y reestructura el menu inferior,
+     * cambiando la visibilidad, los iconos y las etiquetas de texto de acuerdo al tipo de perfil.
+     */
     private void configurarBotonesPorRol() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -64,7 +78,6 @@ public abstract class menuinferior extends AppCompatActivity {
                             boolean esPro = rolUsuario.equalsIgnoreCase("Nutricionista") || rolUsuario.equalsIgnoreCase("Entrenador");
                             boolean esAdmin = rolUsuario.equalsIgnoreCase("Admin");
 
-                            // ⚡ CASO 1: USUARIO NORMAL (Muestra los 5 iconos en tu orden exacto)
                             if (esUsuarioComun) {
                                 if (itemConfig != null) { itemConfig.setVisible(true); itemConfig.setTitle("Config"); itemConfig.setIcon(R.drawable.ic_usuario); }
                                 if (itemNutri != null) { itemNutri.setVisible(true); itemNutri.setTitle("Nutrición"); itemNutri.setIcon(R.drawable.ic_logoredondo); }
@@ -73,25 +86,20 @@ public abstract class menuinferior extends AppCompatActivity {
                                 if (itemPlanes != null) { itemPlanes.setVisible(true); itemPlanes.setTitle("Planes"); itemPlanes.setIcon(R.drawable.ic_logoredondo); }
                             }
 
-                            // ⚡ CASO 2: ADMINISTRADOR (Casita fija en el centro)
                             else if (esAdmin) {
-                                // Apagamos los botones que corresponden al usuario común para limpiar espacio
                                 if (itemConfig != null) itemConfig.setVisible(false);
                                 if (itemTrain != null) itemTrain.setVisible(false);
 
-                                // El botón 2 (Izquierda) se convierte en sus Listas
                                 if (itemNutri != null) {
                                     itemNutri.setVisible(true);
                                     itemNutri.setTitle("Listas");
                                     itemNutri.setIcon(android.R.drawable.ic_menu_agenda);
                                 }
-                                // El botón 3 (CENTRO) SE QUEDA COMO LA CASITA
                                 if (itemInicio != null) {
                                     itemInicio.setVisible(true);
                                     itemInicio.setTitle("Inicio");
                                     itemInicio.setIcon(R.drawable.ic_hogar);
                                 }
-                                // El botón 5 (Derecha) se convierte en su Panel maestro
                                 if (itemPlanes != null) {
                                     itemPlanes.setVisible(true);
                                     itemPlanes.setTitle("Panel");
@@ -105,23 +113,19 @@ public abstract class menuinferior extends AppCompatActivity {
                                 int iconoLista = rolUsuario.equalsIgnoreCase("Nutricionista") ? android.R.drawable.ic_menu_agenda : android.R.drawable.ic_menu_myplaces;
                                 int iconoPlan = rolUsuario.equalsIgnoreCase("Nutricionista") ? android.R.drawable.ic_menu_today : android.R.drawable.ic_menu_edit;
 
-                                // Ocultamos los botones del usuario común
                                 if (itemConfig != null) itemConfig.setVisible(false);
                                 if (itemTrain != null) itemTrain.setVisible(false);
 
-                                // El botón 2 (Izquierda) pasa a ser la Lista de Alumnos/Pacientes
                                 if (itemNutri != null) {
                                     itemNutri.setVisible(true);
                                     itemNutri.setTitle(tipoLista);
                                     itemNutri.setIcon(iconoLista);
                                 }
-                                // El botón 3 (CENTRO EXPANSIBLE) SE QUEDA OBLIGATORIAMENTE COMO LA CASITA
                                 if (itemInicio != null) {
                                     itemInicio.setVisible(true);
                                     itemInicio.setTitle("Inicio");
-                                    itemInicio.setIcon(R.drawable.ic_hogar); // Usa el drawable de tu casita
+                                    itemInicio.setIcon(R.drawable.ic_hogar);
                                 }
-                                // El botón 5 (Derecha) pasa a ser el creador de Planes/Rutinas
                                 if (itemPlanes != null) {
                                     itemPlanes.setVisible(true);
                                     itemPlanes.setTitle(tipoPlan);
@@ -135,14 +139,18 @@ public abstract class menuinferior extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Gestiona el enrutamiento y cambio de actividades en base al ID del elemento seleccionado
+     * y al rol asignado al usuario activo.
+     *
+     * @param id Identificador del recurso (ID del item de menu) seleccionado en la barra inferior.
+     */
     private void navegacionInteligente(int id) {
         Intent intent = null;
 
-        // 1. Botón de Configuración (Solo usuarios normales)
         if (id == R.id.nav_configuracion) {
             if (!(this instanceof configuracionactivity)) intent = new Intent(this, configuracionactivity.class);
         }
-        // 2. Botón de Nutrición (Usuarios) o Listas (Pros/Admin)
         else if (id == R.id.nav_nutricion) {
             if (rolUsuario.equalsIgnoreCase("Usuario")) {
                 if (!(this instanceof consulta)) intent = new Intent(this, consulta.class);
@@ -152,7 +160,6 @@ public abstract class menuinferior extends AppCompatActivity {
                 if (!(this instanceof panelprofesionalactivity)) intent = new Intent(this, panelprofesionalactivity.class);
             }
         }
-        // 3. BOTÓN CENTRAL: LA CASITA
         else if (id == R.id.nav_inicio) {
             if (rolUsuario.equalsIgnoreCase("Nutricionista") || rolUsuario.equalsIgnoreCase("Entrenador")) {
                 if (!(this instanceof panelprofesionalactivity)) intent = new Intent(this, panelprofesionalactivity.class);
@@ -162,11 +169,9 @@ public abstract class menuinferior extends AppCompatActivity {
                 if (!(this instanceof homeactivity)) intent = new Intent(this, homeactivity.class);
             }
         }
-        // 4. Botón de Entrenamiento (Solo usuarios normales)
         else if (id == R.id.nav_entrenamiento) {
             if (!(this instanceof listarutina)) intent = new Intent(this, listarutina.class);
         }
-        // 5. Botón de Planes (Usuarios) o Panel/Asignar (Pros/Admin)
         else if (id == R.id.nav_planes) {
             if (rolUsuario.equalsIgnoreCase("Usuario")) {
                 if (!(this instanceof precios)) intent = new Intent(this, precios.class);
@@ -184,6 +189,10 @@ public abstract class menuinferior extends AppCompatActivity {
         }
     }
 
+    /**
+     * Remarca visualmente de manera forzada el boton correspondiente a la actividad que se esta
+     * mostrando en primer plano en la pantalla del dispositivo.
+     */
     private void marcarBotonActivo() {
         Menu m = bottomNavigationView.getMenu();
         if (this instanceof homeactivity || (this instanceof panelprofesionalactivity && m.findItem(R.id.nav_nutricion) == null)) {
@@ -199,6 +208,11 @@ public abstract class menuinferior extends AppCompatActivity {
         }
     }
 
+    /**
+     * Configura y purga las propiedades por defecto de la barra de acciones superior (ActionBar).
+     *
+     * @param titleString Titulo referencial que se pretendia inyectar en la cabecera.
+     */
     protected void allocateActivityTitle(String titleString) {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);

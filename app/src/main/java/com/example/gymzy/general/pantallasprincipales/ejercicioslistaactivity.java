@@ -3,7 +3,6 @@ package com.example.gymzy.general.pantallasprincipales;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,9 +12,12 @@ import com.example.gymzy.R;
 import com.example.gymzy.general.api.musclewiki.ejerciciomuscle;
 import com.example.gymzy.general.api.musclewiki.ejerciciosadapter;
 import com.example.gymzy.general.api.musclewiki.musclewikiclient;
-
 import java.util.List;
 
+/**
+ * Actividad que muestra los ejercicios asociados a un grupo muscular especifico.
+ * Se encarga de mapear la categoria seleccionada al ingles y consumir los datos desde la API de MuscleWiki.
+ */
 public class ejercicioslistaactivity extends AppCompatActivity {
 
     private RecyclerView rvEjercicios;
@@ -23,47 +25,65 @@ public class ejercicioslistaactivity extends AppCompatActivity {
     private ImageButton btnVolver;
     private ejerciciosadapter adapter;
 
+    /**
+     * Inicializa la interfaz, recupera el grupo muscular del Intent, realiza el mapeo
+     * de idioma y ejecuta la llamada asincrona a la API externa en segundo plano.
+     *
+     * @param savedInstanceState Contiene el estado previo de los datos de la interfaz.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ejercicios_lista); // TU XML
+        setContentView(R.layout.activity_ejercicios_lista);
 
         rvEjercicios = findViewById(R.id.rvEjerciciosGenericos);
         tvTitulo = findViewById(R.id.tvTituloCategoria);
         btnVolver = findViewById(R.id.btnVolverLista);
-        btnVolver.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(ejercicioslistaactivity.this, homeactivity.class);
-                startActivity(intent);
-            }
-        });
+
         String musculoSeleccionado = getIntent().getStringExtra("TITULO_MUSCULO");
         tvTitulo.setText(musculoSeleccionado);
 
         rvEjercicios.setLayoutManager(new LinearLayoutManager(this));
 
-        // Traducción para la búsqueda (El JSON está en inglés)
-        String musculoBusqueda = traducir(musculoSeleccionado);
+        String musculoParaApi = mapearMusculo(musculoSeleccionado);
 
-        musclewikiclient.getEjerciciosPorMusculo(musculoBusqueda, new musclewikiclient.EjerciciosCallback() {
+        musclewikiclient.getEjerciciosPorMusculo(musculoParaApi, new musclewikiclient.EjerciciosCallback() {
+            /**
+             * Callback que recibe la lista de ejercicios de la API y actualiza el RecyclerView en el hilo principal.
+             *
+             * @param ejercicios Lista de objetos {@link ejerciciomuscle} devuelta por el cliente API.
+             */
             @Override
             public void onResponse(List<ejerciciomuscle> ejercicios) {
                 runOnUiThread(() -> {
                     adapter = new ejerciciosadapter(ejercicios, ejercicioslistaactivity.this);
                     rvEjercicios.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
                 });
             }
 
+            /**
+             * Callback que captura errores de red o de procesamiento en la peticion HTTP.
+             *
+             * @param error Mensaje descriptivo con el detalle del fallo.
+             */
             @Override
             public void onFailure(String error) {
-                Log.e("GYMZY_API", "Fallo: " + error);
+                Log.e("GYMZY_API", "Error: " + error);
             }
         });
+
+        btnVolver.setOnClickListener(v -> finish());
     }
 
-    private String traducir(String esp) {
+    /**
+     * Traduce los nombres de los grupos musculares del espanol al ingles
+     * para que coincidan con las claves aceptadas por los endpoints de MuscleWiki.
+     *
+     * @param esp Nombre del musculo en espanol proveniente de la interfaz.
+     * @return Cadena de texto equivalente en ingles compatible con la API.
+     */
+    private String mapearMusculo(String esp) {
+        if (esp == null) return "chest";
         switch (esp) {
             case "Pecho": return "chest";
             case "Espalda": return "back";
@@ -73,7 +93,7 @@ public class ejercicioslistaactivity extends AppCompatActivity {
             case "Piernas": return "quads";
             case "Glúteos": return "glutes";
             case "Abdominales": return "abs";
-            default: return esp;
+            default: return esp.toLowerCase();
         }
     }
 }

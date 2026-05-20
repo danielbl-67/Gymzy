@@ -29,6 +29,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Locale;
 
+/**
+ * Actividad encargada de la gestion y actualizacion del perfil del usuario.
+ * Hereda de {@link menuinferior} y permite modificar datos fisicos, calcular el IMC
+ * en tiempo real y persistir los cambios en Cloud Firestore sin perder metadatos del sistema.
+ */
 public class configuracionactivity extends menuinferior {
 
     private EditText etNombre, etEdad, etPeso, etAltura;
@@ -36,8 +41,6 @@ public class configuracionactivity extends menuinferior {
     private Spinner spinnerSexo, spinnerObjetivo, spinnerActividad;
     private ImageView ivPerfil;
     private Button btnGuardar;
-
-    // ⚡ Almacenamos temporalmente los datos descargados para no perder el Rol, Email ni Código
     private usuario usuarioActual;
 
     private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
@@ -52,6 +55,12 @@ public class configuracionactivity extends menuinferior {
             }
     );
 
+    /**
+     * Infla el diseño, vincula elementos UI, inicializa los componentes de seleccion,
+     * dispara la descarga de datos y configura los escuchadores para el calculo reactivo del IMC.
+     *
+     * @param savedInstanceState Contiene el estado previo de los datos de la interfaz.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +88,9 @@ public class configuracionactivity extends menuinferior {
         btnGuardar.setOnClickListener(v -> guardarPerfilEnFirebase());
     }
 
+    /**
+     * Enlaza las variables locales con sus respectivos identificadores del archivo XML.
+     */
     private void initUI() {
         ivPerfil = findViewById(R.id.ivPerfilUsuario);
         etNombre = findViewById(R.id.etNombrePerfil);
@@ -93,6 +105,10 @@ public class configuracionactivity extends menuinferior {
         btnGuardar = findViewById(R.id.btnGuardarPerfil);
     }
 
+    /**
+     * Llena los componentes Spinner con arreglos de strings correspondientes a opciones
+     * de sexo, meta deportiva y nivel de actividad fisica.
+     */
     private void setupSpinners() {
         String[] opcionesSexo = {"Hombre", "Mujer", "Otro"};
         String[] opcionesObjetivo = {"Perder peso", "Mantener peso", "Ganar masa muscular"};
@@ -111,6 +127,10 @@ public class configuracionactivity extends menuinferior {
         spinnerActividad.setAdapter(adapterAct);
     }
 
+    /**
+     * Baja el documento del usuario logueado desde Cloud Firestore para rellenar los
+     * campos editables y posicionar los selectores en sus valores guardados.
+     */
     private void cargarDatosDesdeFirestore() {
         FirebaseUser user = FirebaseHelper.getAuth().getCurrentUser();
         if (user != null) {
@@ -135,6 +155,12 @@ public class configuracionactivity extends menuinferior {
         }
     }
 
+    /**
+     * Busca la posicion de una cadena de texto dentro del adaptador de un Spinner y establece la seleccion.
+     *
+     * @param spinner       Componente visual de seleccion a modificar.
+     * @param valorGuardado Cadena de texto a buscar dentro de las opciones del componente.
+     */
     private void actualizarSeleccionSpinner(Spinner spinner, String valorGuardado) {
         if (valorGuardado == null) return;
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
@@ -144,6 +170,10 @@ public class configuracionactivity extends menuinferior {
         }
     }
 
+    /**
+     * Realiza el calculo aritmetico del indice de Masa Corporal en base a las entradas de peso y estatura,
+     * actualizando los indicadores de pantalla y alterando los colores del estado.
+     */
     private void calcularIMC() {
         try {
             float peso = Float.parseFloat(etPeso.getText().toString());
@@ -158,17 +188,19 @@ public class configuracionactivity extends menuinferior {
         } catch (Exception e) { tvValorIMC.setText("--"); }
     }
 
+    /**
+     * Extrae los datos actualizados del formulario, rescata las propiedades estructurales previas
+     * y reescribe de forma asincrona el documento en Cloud Firestore.
+     */
     private void guardarPerfilEnFirebase() {
         FirebaseUser user = FirebaseHelper.getAuth().getCurrentUser();
         if (user == null) return;
 
         try {
-            // ⚡ Recuperamos las variables estructurales existentes para no pisarlas ni dejarlas en blanco
             String rolExistente = (usuarioActual != null && usuarioActual.rol != null) ? usuarioActual.rol : "Usuario";
             String emailExistente = (usuarioActual != null && usuarioActual.email != null) ? usuarioActual.email : user.getEmail();
             String codigoExistente = (usuarioActual != null && usuarioActual.codigoVinculacion != null) ? usuarioActual.codigoVinculacion : "";
 
-            // ⚡ Sincronizado con tu constructor definitivo de 10 parámetros
             usuario perfilEditado = new usuario(
                     etNombre.getText().toString().trim(),
                     Integer.parseInt(etEdad.getText().toString().trim()),
@@ -188,7 +220,7 @@ public class configuracionactivity extends menuinferior {
                     .set(perfilEditado)
                     .addOnSuccessListener(aVoid -> {
                         btnGuardar.setEnabled(true);
-                        usuarioActual = perfilEditado; // Actualizamos la referencia local
+                        usuarioActual = perfilEditado;
                         Toast.makeText(this, "Perfil actualizado", Toast.LENGTH_SHORT).show();
                     })
                     .addOnFailureListener(e -> {
@@ -200,16 +232,35 @@ public class configuracionactivity extends menuinferior {
         }
     }
 
+    /**
+     * Clase estatica de soporte que provee las referencias unificadas para el acceso a
+     * las instancias distribuidas de Firebase Realtime Database, Cloud Firestore y Auth.
+     */
     public static class FirebaseHelper {
+        /**
+         * Inicializa y devuelve la referencia al nodo raiz de Realtime Database apuntando a una URL especifica.
+         *
+         * @return DatabaseReference configurada para la base de datos de pruebas.
+         */
         public static DatabaseReference getDatabase() {
             String url = "https://bdpruebasprog-default-rtdb.firebaseio.com/";
             return FirebaseDatabase.getInstance(url).getReference();
         }
 
+        /**
+         * Devuelve la instancia singleton activa de Cloud Firestore.
+         *
+         * @return Objeto FirebaseFirestore.
+         */
         public static FirebaseFirestore getFirestore() {
             return FirebaseFirestore.getInstance();
         }
 
+        /**
+         * Devuelve la instancia singleton activa del gestor de sesiones de Firebase Auth.
+         *
+         * @return Objeto FirebaseAuth.
+         */
         public static FirebaseAuth getAuth() {
             return FirebaseAuth.getInstance();
         }

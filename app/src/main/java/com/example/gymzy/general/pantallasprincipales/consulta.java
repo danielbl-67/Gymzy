@@ -18,7 +18,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// Heredamos de DrawerBaseActivity para mantener el menú lateral
+/**
+ * Actividad que implementa la calculadora de calorias de recetas.
+ * Hereda de {@link menuinferior} y consume la API de OpenFoodFacts mediante Retrofit
+ * para buscar alimentos y calcular macronutrientes segun el pesaje ingresado.
+ */
 public class consulta extends menuinferior {
     EditText etIngrediente, etGramos;
     TextView tvTotalReceta;
@@ -29,6 +33,12 @@ public class consulta extends menuinferior {
     List<String> nombresList = new ArrayList<>();
     List<Double> caloriasList = new ArrayList<>();
 
+    /**
+     * Infla el diseno, enlaza componentes visuales, inicializa el adaptador
+     * del RecyclerView y establece la logica de limpieza e ingreso de ingredientes.
+     *
+     * @param savedInstanceState Contiene el estado previo de los datos de la interfaz.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,8 +93,23 @@ public class consulta extends menuinferior {
         });
     }
 
+    /**
+     * Realiza una llamada asincrona HTTP por Retrofit para buscar el alimento.
+     * Procesa la respuesta para calcular proporcionalmente las kcal segun los gramos dados
+     * e inserta el resultado reactivamente en el adaptador.
+     *
+     * @param query  Nombre o termino de busqueda del alimento.
+     * @param gramos Peso del ingrediente introducido por el usuario.
+     */
     private void buscarYAgregar(String query, double gramos) {
         retrofitclient.getApi().buscarAlimento(query).enqueue(new Callback<alimento.Response>() {
+            /**
+             * Evalua la respuesta del servidor, discrimina el producto mas cercano,
+             * actualiza el contador de calorias total e inserta el elemento al inicio de la lista.
+             *
+             * @param call     Instancia de la llamada HTTP ejecutada.
+             * @param response Objeto contenedor de la respuesta de la API.
+             */
             @Override
             public void onResponse(Call<alimento.Response> call, Response<alimento.Response> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().products.isEmpty()) {
@@ -124,9 +149,14 @@ public class consulta extends menuinferior {
                 }
             }
 
+            /**
+             * Captura fallos criticos de red, timeouts o problemas de resolucion de DNS.
+             *
+             * @param call Instancia de la llamada HTTP ejecutada.
+             * @param t    Objeto Throwable con el detalle tecnico del error.
+             */
             @Override
             public void onFailure(Call<alimento.Response> call, Throwable t) {
-                // Esto te dirá el error real (Ej: "Hostname not verified" o "Timeout")
                 Toast.makeText(consulta.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 t.printStackTrace();
             }
