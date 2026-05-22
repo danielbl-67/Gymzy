@@ -43,8 +43,8 @@ public class musclewikiclient {
 
     /**
      * Descarga la base de datos global de ejercicios en un hilo secundario de forma asincrona.
-     * Evalua secuencialmente el musculo objetivo (Target) de cada elemento y concatena los prefijos
-     * correspondientes a los recursos multimedia locales almacenados en el repositorio remoto.
+     * Evalua secuencialmente el musculo objetivo (Target) o variaciones textuales analíticas en caso
+     * de grupos complejos (como la zona del abdomen) y concatena los prefijos absolutos de red.
      *
      * @param musculoABuscar Clave en ingles de la zona muscular elegida para realizar el filtrado.
      * @param callback       Instancia encargada de procesar e interceptar la respuesta de la peticion.
@@ -67,9 +67,25 @@ public class musclewikiclient {
 
                     if (todos != null) {
                         for (ejerciciomuscle ej : todos) {
-                            // Filtramos: si el músculo del ejercicio contiene lo que buscamos
-                            if (ej.getTarget().toLowerCase().contains(musculoABuscar.toLowerCase())) {
-                                // Arreglamos la URL de la imagen
+                            String target = ej.getTarget().toLowerCase();
+                            String nombreEjercicio = ej.getName() != null ? ej.getName().toLowerCase() : "";
+                            String busqueda = musculoABuscar.toLowerCase();
+
+                            // ⚡ FILTRO INTELIGENTE: Si busca abdominales ("abs"), barremos variaciones y nombres clave del repositorio
+                            boolean coincideAbs = busqueda.equals("abs") &&
+                                    (target.contains("abs") ||
+                                            target.contains("abdominis") ||
+                                            target.contains("obliques") ||
+                                            nombreEjercicio.contains("crunch") ||
+                                            nombreEjercicio.contains("sit-up") ||
+                                            nombreEjercicio.contains("plank"));
+
+                            // Filtro estándar para el resto de grupos musculares anatómicos
+                            boolean coincideMusculo = target.contains(busqueda);
+
+                            // Si cumple cualquiera de los criterios de coincidencia, se procesa el ingrediente/ejercicio
+                            if (coincideMusculo || coincideAbs) {
+                                // Arreglamos la URL de la imagen relativa pasándola a absoluta
                                 if (ej.getVideoUrl() != null && !ej.getVideoUrl().startsWith("http")) {
                                     ej.setVideoUrl(IMG_BASE_URL + ej.getVideoUrl());
                                 }

@@ -76,23 +76,25 @@ public class ejercicioslistaactivity extends AppCompatActivity {
     }
 
     /**
-     * Traduce los nombres de los grupos musculares del espanol al ingles
-     * para que coincidan con las claves aceptadas por los endpoints de MuscleWiki.
+     * Traduce los nombres de los grupos musculares del español al inglés
+     * adaptándolos rigurosamente a las etiquetas de mapeo de la base de datos de MuscleWiki.
      *
-     * @param esp Nombre del musculo en espanol proveniente de la interfaz.
-     * @return Cadena de texto equivalente en ingles compatible con la API.
+     * @param esp Nombre del músculo en español proveniente de la interfaz.
+     * @return Cadena de texto equivalente en inglés compatible con el JSON de la API.
      */
     private String mapearMusculo(String esp) {
         if (esp == null) return "chest";
+
         switch (esp) {
             case "Pecho": return "chest";
             case "Espalda": return "back";
             case "Hombros": return "shoulders";
             case "Bíceps": return "biceps";
             case "Tríceps": return "triceps";
-            case "Piernas": return "quads";
             case "Glúteos": return "glutes";
+            case "Piernas": return "quadriceps";
             case "Abdominales": return "abs";
+            case "Cardio": return "cardio";
             default: return esp.toLowerCase();
         }
     }

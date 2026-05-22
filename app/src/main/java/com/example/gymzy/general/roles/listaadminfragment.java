@@ -17,10 +17,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Fragmento que muestra listas filtradas de usuarios o profesionales para el modulo de administracion.
- * Utiliza un argumento dinamico para determinar que tipo de roles debe listar desde Firestore.
- */
 public class listaadminfragment extends Fragment {
 
     private RecyclerView recyclerView;
@@ -29,12 +25,6 @@ public class listaadminfragment extends Fragment {
     private FirebaseFirestore db;
     private String tipoFiltro;
 
-    /**
-     * Construye una nueva instancia parametrizada del fragmento aplicando un filtro especifico.
-     *
-     * @param tipoFiltro Cadena de texto que define el grupo a mostrar ("usuarios" o "profesionales").
-     * @return Instancia configurada de listaadminfragment.
-     */
     public static listaadminfragment newInstance(String tipoFiltro) {
         listaadminfragment fragment = new listaadminfragment();
         Bundle args = new Bundle();
@@ -43,14 +33,6 @@ public class listaadminfragment extends Fragment {
         return fragment;
     }
 
-    /**
-     * Infla el diseño visual, recupera los argumentos de filtrado e inicializa el adaptador del RecyclerView.
-     *
-     * @param inflater           Objeto encargado de inflar la vista en el fragmento.
-     * @param container          Contenedor contenedor del fragmento.
-     * @param savedInstanceState Estado previamente almacenado de la instancia.
-     * @return Vista raiz del fragmento.
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -64,10 +46,7 @@ public class listaadminfragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerViewAdminTab);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Inicializamos pasando la lista y la interfaz de escucha de borrado
-        adapter = new usuariosAdminAdapter(listaUsuarios, () -> {
-            // Aquí puedes meter lógicas extras si se vacía la lista
-        });
+        adapter = new usuariosAdminAdapter(listaUsuarios, () -> {});
         recyclerView.setAdapter(adapter);
 
         cargarDatosDesdeFirestore();
@@ -75,10 +54,6 @@ public class listaadminfragment extends Fragment {
         return view;
     }
 
-    /**
-     * Consulta la coleccion completa de usuarios en Firestore y discrimina los registros localmente
-     * agregando a la lista solo aquellos que coincidan con las restricciones del filtro configurado.
-     */
     public void cargarDatosDesdeFirestore() {
         db.collection("Usuarios")
                 .get()
