@@ -19,51 +19,38 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Actividad que implementa la calculadora de calorias de recetas.
- * Hereda de {@link menuinferior} y consume la API de OpenFoodFacts mediante Retrofit
- * para buscar alimentos y calcular macronutrientes segun el pesaje ingresado.
+ * Actividad modular que implementa la calculadora reactiva de calorías de recetas.
+ * Consume la API optimizada de OpenFoodFacts mediante Retrofit.
  */
 public class consulta extends menuinferior {
-    EditText etIngrediente, etGramos;
-    TextView tvTotalReceta;
-    double totalCaloriasReceta = 0;
+    private EditText etIngrediente, etGramos;
+    private TextView tvTotalReceta;
+    private double totalCaloriasReceta = 0;
 
-    RecyclerView rvIngredientes;
-    ingredienteadapter adapter;
-    List<String> nombresList = new ArrayList<>();
-    List<Double> caloriasList = new ArrayList<>();
+    private RecyclerView rvIngredientes;
+    private ingredienteadapter adapter;
+    private List<String> nombresList = new ArrayList<>();
+    private List<Double> caloriasList = new ArrayList<>();
 
-    /**
-     * Infla el diseno, enlaza componentes visuales, inicializa el adaptador
-     * del RecyclerView y establece la logica de limpieza e ingreso de ingredientes.
-     *
-     * @param savedInstanceState Contiene el estado previo de los datos de la interfaz.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 1. Inflamos la vista dentro del Drawer para que el menú funcione
         View view = getLayoutInflater().inflate(R.layout.activity_consulta_nutrientes, null);
         setContentView(view);
-
-        // 2. Establecemos el título en la barra superior del Drawer
         allocateActivityTitle("Calculadora de Recetas");
 
-        // 3. Inicializar vistas
         etIngrediente = findViewById(R.id.etIngrediente);
         etGramos = findViewById(R.id.etGramos);
         tvTotalReceta = findViewById(R.id.tvTotalReceta);
         Button btnAgregar = findViewById(R.id.btnAgregar);
         Button btnBorrar = findViewById(R.id.btnLimpiar);
 
-        // 4. Configurar RecyclerView
         rvIngredientes = findViewById(R.id.rvIngredientes);
         rvIngredientes.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ingredienteadapter(nombresList, caloriasList);
         rvIngredientes.setAdapter(adapter);
 
-        // 5. Lógica Botón Borrar
         btnBorrar.setOnClickListener(v -> {
             totalCaloriasReceta = 0;
             tvTotalReceta.setText("0.00 kcal");
@@ -72,10 +59,9 @@ public class consulta extends menuinferior {
             nombresList.clear();
             caloriasList.clear();
             adapter.notifyDataSetChanged();
-            Toast.makeText(consulta.this, "Datos borrados", Toast.LENGTH_SHORT).show();
+            Toast.makeText(consulta.this, "Datos limpios", Toast.LENGTH_SHORT).show();
         });
 
-        // 6. Lógica Botón Agregar
         btnAgregar.setOnClickListener(v -> {
             String nombre = etIngrediente.getText().toString().trim();
             String gramosStr = etGramos.getText().toString().trim();
@@ -85,80 +71,90 @@ public class consulta extends menuinferior {
                     double gramos = Double.parseDouble(gramosStr);
                     buscarYAgregar(nombre, gramos);
                 } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Introduce un número válido en gramos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Número de gramos inválido", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, "Rellena todos los campos", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Campos incompletos", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     /**
-     * Realiza una llamada asincrona HTTP por Retrofit para buscar el alimento.
-     * Procesa la respuesta para calcular proporcionalmente las kcal segun los gramos dados
-     * e inserta el resultado reactivamente en el adaptador.
+     * Realiza una llamada asíncrona HTTP por Retrofit para buscar el alimento.
+     * Aplica un filtro de doble prioridad (Coincidencia exacta > Coincidencia parcial más corta)
+     * para garantizar la precisión en la selección de ingredientes.
      *
-     * @param query  Nombre o termino de busqueda del alimento.
+     * @param query  Nombre o término de búsqueda del alimento.
      * @param gramos Peso del ingrediente introducido por el usuario.
      */
     private void buscarYAgregar(String query, double gramos) {
         retrofitclient.getApi().buscarAlimento(query).enqueue(new Callback<alimento.Response>() {
-            /**
-             * Evalua la respuesta del servidor, discrimina el producto mas cercano,
-             * actualiza el contador de calorias total e inserta el elemento al inicio de la lista.
-             *
-             * @param call     Instancia de la llamada HTTP ejecutada.
-             * @param response Objeto contenedor de la respuesta de la API.
-             */
             @Override
             public void onResponse(Call<alimento.Response> call, Response<alimento.Response> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().products.isEmpty()) {
+                if (response.isSuccessful() && response.body() != null && response.body().products != null && !response.body().products.isEmpty()) {
 
                     alimento.Product productoSeleccionado = null;
+                    String queryLower = query.toLowerCase().trim();
 
+                    // ⚡ FASE 1: Buscar una coincidencia exacta de texto primero
                     for (alimento.Product p : response.body().products) {
-                        if (p.nombre != null && p.nombre.equalsIgnoreCase(query)) {
+                        if (p.nombre != null && p.nombre.trim().equalsIgnoreCase(query)) {
                             productoSeleccionado = p;
-                            break;
+                            break; // Coincidencia perfecta encontrada, salimos
                         }
                     }
 
+                    // ⚡ FASE 2: Si no hubo coincidencia exacta, buscamos la coincidencia parcial MÁS CORTA
                     if (productoSeleccionado == null) {
-                        productoSeleccionado = response.body().products.get(0);
-                        Toast.makeText(consulta.this, "Usando el resultado más cercano", Toast.LENGTH_SHORT).show();
+                        int longitudMinima = Integer.MAX_VALUE;
+
+                        for (alimento.Product p : response.body().products) {
+                            if (p.nombre != null) {
+                                String nombreProdLower = p.nombre.toLowerCase();
+                                if (nombreProdLower.contains(queryLower)) {
+                                    // El nombre más corto será siempre el más cercano al término original
+                                    if (nombreProdLower.length() < longitudMinima) {
+                                        longitudMinima = nombreProdLower.length();
+                                        productoSeleccionado = p;
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    alimento.Nutrients n = productoSeleccionado.nutrientes;
+                    // ⚡ FASE 3: Si todo lo anterior falla, recurrimos al primer resultado relevante de la API
+                    if (productoSeleccionado == null) {
+                        productoSeleccionado = response.body().products.get(0);
+                    }
 
-                    // Cálculo de calorías basado en los gramos introducidos
-                    double calIngrediente = (n.kcal * gramos) / 100;
-                    totalCaloriasReceta += calIngrediente;
+                    // Procesamos los nutrientes del producto seleccionado con seguridad
+                    if (productoSeleccionado.nutrientes != null) {
+                        alimento.Nutrients n = productoSeleccionado.nutrientes;
 
-                    tvTotalReceta.setText(String.format("%.2f kcal", totalCaloriasReceta));
+                        double calIngrediente = (n.kcal * gramos) / 100;
+                        totalCaloriasReceta += calIngrediente;
 
-                    nombresList.add(0, productoSeleccionado.nombre + " (" + gramos + "g)");
-                    caloriasList.add(0, calIngrediente);
-                    adapter.notifyItemInserted(0);
-                    rvIngredientes.scrollToPosition(0);
+                        tvTotalReceta.setText(String.format("%.2f kcal", totalCaloriasReceta));
 
-                    etIngrediente.setText("");
-                    etGramos.setText("");
+                        nombresList.add(0, productoSeleccionado.nombre + " (" + gramos + "g)");
+                        caloriasList.add(0, calIngrediente);
+                        adapter.notifyItemInserted(0);
+                        rvIngredientes.scrollToPosition(0);
+
+                        etIngrediente.setText("");
+                        etGramos.setText("");
+                    } else {
+                        Toast.makeText(consulta.this, "El alimento seleccionado no contiene una tabla nutricional válida", Toast.LENGTH_SHORT).show();
+                    }
 
                 } else {
-                    Toast.makeText(consulta.this, "Alimento no encontrado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(consulta.this, "No se encontraron resultados para la búsqueda", Toast.LENGTH_SHORT).show();
                 }
             }
 
-            /**
-             * Captura fallos criticos de red, timeouts o problemas de resolucion de DNS.
-             *
-             * @param call Instancia de la llamada HTTP ejecutada.
-             * @param t    Objeto Throwable con el detalle tecnico del error.
-             */
             @Override
             public void onFailure(Call<alimento.Response> call, Throwable t) {
-                Toast.makeText(consulta.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                t.printStackTrace();
+                Toast.makeText(consulta.this, "Fallo de red: " + t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

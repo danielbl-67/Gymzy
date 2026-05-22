@@ -3,20 +3,34 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#050505"
+    android:background="#0A0A0A"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="20dp">
 
-    <TextView
-        android:id="@+id/tvTituloListaClientes"
-        android:layout_width="wrap_content"
+    <!-- Header personalizado -->
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/comfortaa"
-        android:text="CARGANDO LISTA..."
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:id="@+id/ivAtrasLista"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/tvTituloListaClientes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="CARGANDO..."
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -25,10 +39,19 @@
 
         <ProgressBar
             android:id="@+id/progressBarClientesPro"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#FF5252"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvListaVacia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:indeterminateTint="#FF5252"
+            android:text="No hay clientes vinculados aún"
+            android:textColor="#555555"
             android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -36,8 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingBottom="8dp"
-            android:scrollbars="vertical"/>
+            android:scrollbars="vertical" />
 
     </FrameLayout>
 </LinearLayout>

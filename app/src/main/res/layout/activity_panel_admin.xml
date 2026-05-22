@@ -4,43 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#050505">
+    android:background="#0A0A0A">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="#121212"
-            android:paddingHorizontal="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:text="PANEL ADMIN"
-                android:textColor="#FF5252"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/ivAdminLogout"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@android:drawable/ic_lock_power_off"
-                app:tint="#FF5252" />
-        </RelativeLayout>
+        android:orientation="vertical">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayoutAdmin"
@@ -49,7 +18,8 @@
             android:background="#121212"
             app:tabIndicatorColor="#FF5252"
             app:tabSelectedTextColor="#FF5252"
-            app:tabTextColor="#80FFFFFF" />
+            app:tabTextColor="#80FFFFFF"
+            android:layout_marginTop="4dp"/>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPagerAdmin"
@@ -64,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="90dp"
+        android:layout_marginBottom="24dp"
         android:backgroundTint="#FF5252"
         android:src="@android:drawable/ic_input_add"
         app:tint="#FFFFFF"

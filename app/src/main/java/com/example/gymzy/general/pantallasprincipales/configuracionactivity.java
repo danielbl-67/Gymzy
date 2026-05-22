@@ -39,21 +39,10 @@ public class configuracionactivity extends menuinferior {
     private EditText etNombre, etEdad, etPeso, etAltura;
     private TextView tvValorIMC, tvEstadoIMC;
     private Spinner spinnerSexo, spinnerObjetivo, spinnerActividad;
-    private ImageView ivPerfil;
     private Button btnGuardar;
     private usuario usuarioActual;
 
-    private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Uri imageUri = result.getData().getData();
-                    if (imageUri != null) {
-                        ivPerfil.setImageURI(imageUri);
-                    }
-                }
-            }
-    );
+
 
     /**
      * Infla el diseño, vincula elementos UI, inicializa los componentes de seleccion,
@@ -72,10 +61,6 @@ public class configuracionactivity extends menuinferior {
         setupSpinners();
         cargarDatosDesdeFirestore();
 
-        ivPerfil.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            galleryLauncher.launch(intent);
-        });
 
         TextWatcher imcWatcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -92,7 +77,6 @@ public class configuracionactivity extends menuinferior {
      * Enlaza las variables locales con sus respectivos identificadores del archivo XML.
      */
     private void initUI() {
-        ivPerfil = findViewById(R.id.ivPerfilUsuario);
         etNombre = findViewById(R.id.etNombrePerfil);
         etEdad = findViewById(R.id.etEdadPerfil);
         etPeso = findViewById(R.id.etPesoPerfil);

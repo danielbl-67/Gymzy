@@ -7,29 +7,48 @@ import android.view.View;
 import android.widget.FrameLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.gymzy.R;
+
+// Importaciones dinámicas del ecosistema de roles y paneles independientes
+import com.example.gymzy.general.roles.listaclientesactivity;
+import com.example.gymzy.general.roles.listausuariosadminactivity;
 import com.example.gymzy.general.roles.paneladminactivity;
 import com.example.gymzy.general.roles.panelprofesionalactivity;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
- * Clase abstracta base que implementa el menu de navegacion inferior (BottomNavigationView).
- * Modifica de forma dinamica los iconos, titulos y rutas de los botones segun el rol del usuario logueado.
+ * Clase abstracta base que implementa el menú de navegación inferior (BottomNavigationView).
+ * Estructura de forma reactiva los iconos y títulos analizando el rol del usuario autenticado en Cloud Firestore,
+ * resolviendo bucles redundantes redirigiendo de forma directa hacia las vistas analíticas independientes.
+ *
+ * @author Gymzy Team
+ * @version 2.1
  */
 public abstract class menuinferior extends AppCompatActivity {
 
+    /** Contenedor visual del menú de navegación inferior. */
     protected BottomNavigationView bottomNavigationView;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private String rolUsuario = "Usuario";
 
     /**
-     * Reemplaza el contenedor base, infla el diseño del menu inferior, inicializa los servicios
-     * de Firebase y configura los escuchadores de seleccion de items.
+     * Reemplaza el contenedor base, infla el diseño del menú inferior, inicializa los servicios
+     * de Firebase y configura los escuchadores de selección de ítems.
+     * <p>
+     * Realiza las siguientes tareas de configuración:
+     * <ul>
+     * <li>1. Infla y encapsula la jerarquía visual nativa sobre el activityContainer base.</li>
+     * <li>2. Acopla de forma síncrona la vista hija suministrada en el FrameLayout.</li>
+     * <li>3. Inicializar instancias globales de autenticación y base de datos distribuida.</li>
+     * <li>4. Arrancar los escuchadores dinámicos de eventos sobre el BottomNavigationView.</li>
+     * </ul>
      *
-     * @param view Vista de la actividad hija que se acoplara dentro del contenedor principal.
+     * @param view Vista de la actividad hija que se acoplará dentro del contenedor principal.
      */
     @Override
     public void setContentView(View view) {
@@ -53,7 +72,7 @@ public abstract class menuinferior extends AppCompatActivity {
     }
 
     /**
-     * Consulta el rol del usuario en Cloud Firestore y reestructura el menu inferior,
+     * Consulta el rol del usuario en Cloud Firestore y reestructura el menú inferior,
      * cambiando la visibilidad, los iconos y las etiquetas de texto de acuerdo al tipo de perfil.
      */
     private void configurarBotonesPorRol() {
@@ -101,9 +120,7 @@ public abstract class menuinferior extends AppCompatActivity {
                                     itemInicio.setIcon(R.drawable.ic_hogar);
                                 }
                                 if (itemPlanes != null) {
-                                    itemPlanes.setVisible(true);
-                                    itemPlanes.setTitle("Panel");
-                                    itemPlanes.setIcon(android.R.drawable.ic_menu_manage);
+                                    itemPlanes.setVisible(false); // Ocultado para evitar duplicaciones con la nueva pantalla limpia
                                 }
                             }
 
@@ -141,7 +158,7 @@ public abstract class menuinferior extends AppCompatActivity {
 
     /**
      * Gestiona el enrutamiento y cambio de actividades en base al ID del elemento seleccionado
-     * y al rol asignado al usuario activo.
+     * y al rol asignado al usuario activo, resolviendo bucles infinitos en perfiles de control.
      *
      * @param id Identificador del recurso (ID del item de menu) seleccionado en la barra inferior.
      */
@@ -155,9 +172,11 @@ public abstract class menuinferior extends AppCompatActivity {
             if (rolUsuario.equalsIgnoreCase("Usuario")) {
                 if (!(this instanceof consulta)) intent = new Intent(this, consulta.class);
             } else if (rolUsuario.equalsIgnoreCase("Admin")) {
-                if (!(this instanceof paneladminactivity)) intent = new Intent(this, paneladminactivity.class);
+                // ⚡ FIJADO: El Admin viaja de forma limpia a su actividad de fragmentos dedicada
+                if (!(this instanceof listausuariosadminactivity)) intent = new Intent(this, listausuariosadminactivity.class);
             } else {
-                if (!(this instanceof panelprofesionalactivity)) intent = new Intent(this, panelprofesionalactivity.class);
+                // ⚡ FIJADO: El Profesional abre de forma directa su recycler de alumnos vinculados
+                if (!(this instanceof listaclientesactivity)) intent = new Intent(this, listaclientesactivity.class);
             }
         }
         else if (id == R.id.nav_inicio) {
@@ -178,7 +197,7 @@ public abstract class menuinferior extends AppCompatActivity {
             } else if (rolUsuario.equalsIgnoreCase("Admin")) {
                 if (!(this instanceof paneladminactivity)) intent = new Intent(this, paneladminactivity.class);
             } else {
-                if (!(this instanceof panelprofesionalactivity)) intent = new Intent(this, panelprofesionalactivity.class);
+                android.widget.Toast.makeText(this, "Asignador de Planes: Próximamente", android.widget.Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -191,11 +210,13 @@ public abstract class menuinferior extends AppCompatActivity {
 
     /**
      * Remarca visualmente de manera forzada el boton correspondiente a la actividad que se esta
-     * mostrando en primer plano en la pantalla del dispositivo.
+     * mostrando en primer plano en la pantalla del dispositivo, controlando los estados de las subclases.
      */
     private void marcarBotonActivo() {
         Menu m = bottomNavigationView.getMenu();
-        if (this instanceof homeactivity || (this instanceof panelprofesionalactivity && m.findItem(R.id.nav_nutricion) == null)) {
+        if (m == null) return;
+
+        if (this instanceof homeactivity || this instanceof panelprofesionalactivity || this instanceof paneladminactivity) {
             if (m.findItem(R.id.nav_inicio) != null) m.findItem(R.id.nav_inicio).setChecked(true);
         } else if (this instanceof listarutina && m.findItem(R.id.nav_entrenamiento) != null) {
             m.findItem(R.id.nav_entrenamiento).setChecked(true);
@@ -203,16 +224,14 @@ public abstract class menuinferior extends AppCompatActivity {
             m.findItem(R.id.nav_configuracion).setChecked(true);
         } else if (this instanceof consulta && m.findItem(R.id.nav_nutricion) != null) {
             m.findItem(R.id.nav_nutricion).setChecked(true);
+        } else if ((this instanceof listaclientesactivity || this instanceof listausuariosadminactivity) && m.findItem(R.id.nav_nutricion) != null) {
+            // ⚡ FIJADO: Ilumina la pestaña analítica correcta (Pacientes/Listas) al abrir las subpantallas
+            m.findItem(R.id.nav_nutricion).setChecked(true);
         } else if (this instanceof precios && m.findItem(R.id.nav_planes) != null) {
             m.findItem(R.id.nav_planes).setChecked(true);
         }
     }
 
-    /**
-     * Configura y purga las propiedades por defecto de la barra de acciones superior (ActionBar).
-     *
-     * @param titleString Titulo referencial que se pretendia inyectar en la cabecera.
-     */
     protected void allocateActivityTitle(String titleString) {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
