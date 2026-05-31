@@ -30,13 +30,6 @@ public class historialadaptador extends RecyclerView.Adapter<historialadaptador.
         this.listaRegistros = listaRegistros;
     }
 
-    /**
-     * Infla el diseño XML de la fila del historial y genera una nueva instancia del ViewHolder.
-     *
-     * @param parent   Contenedor padre donde se alojara la vista del item.
-     * @param viewType Indicador del tipo de vista.
-     * @return Nueva instancia de la clase interna ViewHolder.
-     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,25 +37,34 @@ public class historialadaptador extends RecyclerView.Adapter<historialadaptador.
         return new ViewHolder(view);
     }
 
-    /**
-     * Vincula los datos del mapa con los TextViews del ViewHolder e implementa una conversion
-     * segura de milisegundos a texto legible de fecha y hora.
-     *
-     * @param holder   Contenedor de las referencias a los elementos visuales de la fila.
-     * @param position Indice numerico del elemento dentro de la coleccion de datos.
-     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Map<String, Object> registro = listaRegistros.get(position);
 
-        String series = String.valueOf(registro.get("series"));
-        String reps = String.valueOf(registro.get("reps"));
-        String peso = String.valueOf(registro.get("peso")) + " kg";
+        // --- SOLUCCIÓN AL PROBLEMA DEL "null" ---
 
+        // 1. Validar Series
+        Object seriesObj = registro.get("series");
+        String series = (seriesObj != null) ? seriesObj.toString() : "-";
+
+        // 2. Validar Repeticiones (Usa "repeticiones" o "reps" según cómo lo guardes en Firestore)
+        // Como en el paso anterior lo guardamos como "repeticiones", lo buscamos prioritariamente así:
+        Object repsObj = registro.get("repeticiones");
+        if (repsObj == null) {
+            repsObj = registro.get("reps"); // Por si acaso quedan registros viejos con la clave corta
+        }
+        String reps = (repsObj != null) ? repsObj.toString() : "-";
+
+        // 3. Validar Peso
+        Object pesoObj = registro.get("peso");
+        String peso = (pesoObj != null) ? pesoObj.toString() + " kg" : "- kg";
+
+        // Asignar los valores limpios a las vistas
         holder.tvSeries.setText(series);
         holder.tvReps.setText(reps);
         holder.tvPeso.setText(peso);
 
+        // --- Procesamiento de Fecha (Se mantiene igual, protegido) ---
         if (registro.containsKey("fechaMillis") && registro.get("fechaMillis") != null) {
             try {
                 long millis;
@@ -84,27 +86,14 @@ public class historialadaptador extends RecyclerView.Adapter<historialadaptador.
         }
     }
 
-    /**
-     * Devuelve la cantidad total de marcas indexadas en la coleccion de historial.
-     *
-     * @return Numero total de elementos.
-     */
     @Override
     public int getItemCount() {
         return listaRegistros.size();
     }
 
-    /**
-     * Clase estatica contenedora que aloja e identifica las referencias visuales del diseno del item.
-     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvFecha, tvSeries, tvReps, tvPeso;
 
-        /**
-         * Constructor que vincula los TextViews del archivo de diseno XML individual.
-         *
-         * @param itemView Vista raiz de la fila (item_historial).
-         */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvFecha = itemView.findViewById(R.id.tvFechaItem);
